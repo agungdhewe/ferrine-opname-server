@@ -97,16 +97,12 @@ export const upsertProject = async (projectData, creator) => {
         throw new Error('Tanggal mulai tidak boleh lebih besar dari tanggal selesai.');
     }
 
-    // Cek Overlap
-    const isOverlap = await checkProjectOverlap(
-        projectData.siteCode,
-        projectData.brandCode,
-        projectData.dateStart,
-        projectData.dateEnd,
-        projectData.projectId
-    );
-    if (isOverlap) {
-        throw new Error('Terdapat project lain di Site dan Brand yang sama pada rentang waktu tersebut.');
+    // Cek Immutability (Project yang sudah completed tidak bisa diubah)
+    if (projectData.projectId) {
+        const existingProject = await getProjectById(projectData.projectId);
+        if (existingProject && existingProject.isCompleted) {
+            throw new Error('Project yang sudah selesai tidak dapat diubah.');
+        }
     }
 
     if (projectData.projectId) {
@@ -114,20 +110,21 @@ export const upsertProject = async (projectData, creator) => {
         const sql = `
             UPDATE ${project.TABLE} SET
                 ${col.projectCode} = $1,
-                ${col.dateStart} = $2,
-                ${col.dateEnd} = $3,
-                ${col.description} = $4,
-                ${col.workingType} = $5,
-                ${col.siteCode} = $6,
-                ${col.brandCode} = $7,
-                ${col.disabled} = $8,
-                ${col.updatedBy} = $9,
+                ${col.projectName} = $2,
+                ${col.dateStart} = $3,
+                ${col.dateEnd} = $4,
+                ${col.description} = $5,
+                ${col.workingType} = $6,
+                ${col.siteCode} = $7,
+                ${col.brandCode} = $8,
+                ${col.disabled} = $9,
+                ${col.updatedBy} = $10,
                 ${col.updatedAt} = CURRENT_TIMESTAMP
-            WHERE ${col.projectId} = $10
+            WHERE ${col.projectId} = $11
             RETURNING *
         `;
         const values = [
-            projectData.projectCode, projectData.dateStart, projectData.dateEnd,
+            projectData.projectCode, projectData.projectName, projectData.dateStart, projectData.dateEnd,
             projectData.description, projectData.workingType, projectData.siteCode,
             projectData.brandCode, projectData.disabled || false, creator, projectData.projectId
         ];
@@ -137,14 +134,15 @@ export const upsertProject = async (projectData, creator) => {
         // Insert
         const sql = `
             INSERT INTO ${project.TABLE} (
-                ${col.projectCode}, ${col.dateStart}, ${col.dateEnd}, 
+                ${col.projectCode}, ${col.projectName}, ${col.dateStart}, ${col.dateEnd}, 
                 ${col.description}, ${col.workingType}, ${col.siteCode}, 
-                ${col.brandCode}, ${col.disabled}, ${col.createdBy}, ${col.updatedBy}
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+                ${col.brandCode}, ${col.disabled}, ${col.createdBy}, ${col.updatedBy},
+                ${col.isCompleted}, ${col.projectStatus}
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, FALSE, 'ACTIVE')
             RETURNING *
         `;
         const values = [
-            projectData.projectCode, projectData.dateStart, projectData.dateEnd,
+            projectData.projectCode, projectData.projectName, projectData.dateStart, projectData.dateEnd,
             projectData.description, projectData.workingType, projectData.siteCode,
             projectData.brandCode, projectData.disabled || false, creator, creator
         ];
@@ -355,13 +353,15 @@ export const bulkImportProjectItems = async (projectId, items, creator) => {
 
 /**
  * Summary Calculation
+ * @param {number} projectId
+ * @param {object} filters
  */
-export const getProjectSummary = async (projectId) => {
+export const getProjectSummary = async (projectId, filters = {}) => {
     const pr = DbContract.ProjectResult;
     const pd = DbContract.ProjectDetail;
     const item = DbContract.Item;
 
-    const sql = `
+    let sql = `
         SELECT 
             i.${item.Columns.itemId}, 
             i.${item.Columns.name},
@@ -372,10 +372,23 @@ export const getProjectSummary = async (projectId) => {
         LEFT JOIN ${pr.TABLE} pr ON i.${item.Columns.itemId} = pr.${pr.Columns.itemId} AND pr.${pr.Columns.projectId} = $1 AND pr.${pr.Columns.isDeleted} = FALSE
         LEFT JOIN ${pd.TABLE} pd ON i.${item.Columns.itemId} = pd.${pd.Columns.itemId} AND pd.${pd.Columns.projectId} = $1 AND pd.${pd.Columns.isDeleted} = FALSE
         WHERE i.${item.Columns.isDeleted} = FALSE
-        GROUP BY i.${item.Columns.itemId}, i.${item.Columns.name}, i.${item.Columns.article}, pd.${pd.Columns.stockQty}, i.${item.Columns.stockQty}
-        HAVING SUM(COALESCE(pr.${pr.Columns.scannedQty}, 0)) > 0 OR pd.${pd.Columns.stockQty} > 0
     `;
-    const result = await query(sql, [projectId]);
+    const params = [projectId];
+    let pIdx = 2;
+
+    if (filters.search) {
+        sql += ` AND (i.${item.Columns.itemId} ILIKE $${pIdx} OR i.${item.Columns.name} ILIKE $${pIdx} OR i.${item.Columns.article} ILIKE $${pIdx} OR i.${item.Columns.description} ILIKE $${pIdx})`;
+        params.push(`%${filters.search}%`);
+        pIdx++;
+    }
+
+    sql += `
+        GROUP BY i.${item.Columns.itemId}, i.${item.Columns.name}, i.${item.Columns.article}, pd.${pd.Columns.stockQty}, i.${item.Columns.stockQty}
+        HAVING SUM(COALESCE(pr.${pr.Columns.scannedQty}, 0)) > 0 OR pd.${pd.Columns.stockQty} > 0 OR i.${item.Columns.stockQty} > 0
+        ORDER BY i.${item.Columns.itemId} ASC
+    `;
+
+    const result = await query(sql, params);
     return result.rows;
 };
 
@@ -399,4 +412,37 @@ export const deleteProject = async (projectId, updater) => {
     `;
     const result = await query(sql, [updater, projectId]);
     return result.rowCount > 0;
+};
+
+/**
+ * Menandai project sebagai selesai
+ * @param {number} projectId 
+ * @param {string} projectCode 
+ * @param {string} updater 
+ */
+export const markAsCompleted = async (projectId, projectCode, updater) => {
+    const project = DbContract.ProjectHeader;
+    const col = project.Columns;
+
+    // Verify Project Code
+    const existing = await getProjectById(projectId);
+    if (!existing) throw new Error('Project tidak ditemukan.');
+    if (existing.projectCode !== projectCode) {
+        throw new Error('Konfirmasi Kode Project tidak sesuai.');
+    }
+    if (existing.isCompleted) {
+        throw new Error('Project sudah berstatus selesai.');
+    }
+
+    const sql = `
+        UPDATE ${project.TABLE} SET
+            ${col.isCompleted} = TRUE,
+            ${col.projectStatus} = 'COMPLETED',
+            ${col.updatedBy} = $1,
+            ${col.updatedAt} = CURRENT_TIMESTAMP
+        WHERE ${col.projectId} = $2
+        RETURNING *
+    `;
+    const result = await query(sql, [updater, projectId]);
+    return result.rows[0];
 };

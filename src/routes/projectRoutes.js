@@ -18,8 +18,9 @@ router.get('/:id', projectController.view);
 router.get('/:id/summary/download', projectController.downloadSummary);
 router.post('/:id/upload', isAdmin, projectController.uploadMiddleware, projectController.uploadCsv);
 router.get('/:id/edit', isAdmin, projectController.form);
-router.post('/:id/edit', isAdmin, projectController.save);
-router.post('/:id/delete', isAdmin, projectController.remove);
+router.post('/:id/save', authenticateJWT, isAdmin, projectController.save);
+router.post('/:id/complete', authenticateJWT, isAdmin, projectController.markAsCompleted);
+router.get('/:id/delete', authenticateJWT, isAdmin, projectController.remove);
 
 // User Assignment
 router.post('/:id/users/assign', isAdmin, projectController.assignUser);

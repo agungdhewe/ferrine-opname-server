@@ -322,3 +322,21 @@ tambahkan ke menu
 
 
 #23
+ada perubahan pada GEMINI.md, 
+cek di Fitur > Project dan Summary Project, serta pada Logical data model
+- Jangan membuat file, direktori, atau kode apa pun sekarang.
+- Berikan ringkasan singkat (bullet points) perubahan yang terjadi.
+- Tunggu konfirmasi saya sebelum melakukan tindakan pengembangan fitur.
+- Jawab 'SIAP' jika kamu sudah paham.
+
+#24
+buatkan dahulu DbContract, dan database migration -> migration-2.sql
+
+
+
+#25
+revisi dan update management project sesuai dengan instruksi terakhir
+
+
+#26 
+munculkan project name di project list pada management project

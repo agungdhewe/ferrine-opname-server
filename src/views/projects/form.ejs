@@ -34,7 +34,17 @@
                                 Code</label>
                             <input type="text" class="form-control" id="projectCode" name="projectCode" required
                                 placeholder="Contoh: OP-JKT-24"
-                                value="<%= targetProject ? targetProject.projectCode : '' %>">
+                                value="<%= targetProject ? targetProject.projectCode : '' %>" <%=targetProject &&
+                                targetProject.isCompleted ? 'disabled' : '' %>>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="projectName"
+                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Project
+                                Name</label>
+                            <input type="text" class="form-control" id="projectName" name="projectName" required
+                                placeholder="Contoh: Opname Jakarta"
+                                value="<%= targetProject ? targetProject.projectName : '' %>" <%=targetProject &&
+                                targetProject.isCompleted ? 'disabled' : '' %>>
                         </div>
 
                         <div class="col-md-3">
@@ -42,7 +52,8 @@
                                 class="form-label fw-bold font-monospace small text-uppercase text-secondary">Site
                                 Code</label>
                             <input type="text" class="form-control" id="siteCode" name="siteCode" required
-                                placeholder="JKT01" value="<%= targetProject ? targetProject.siteCode : '' %>">
+                                placeholder="JKT01" value="<%= targetProject ? targetProject.siteCode : '' %>"
+                                <%=targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
                         </div>
 
                         <div class="col-md-3">
@@ -50,7 +61,8 @@
                                 class="form-label fw-bold font-monospace small text-uppercase text-secondary">Brand
                                 Code</label>
                             <input type="text" class="form-control" id="brandCode" name="brandCode" required
-                                placeholder="FERRINE" value="<%= targetProject ? targetProject.brandCode : '' %>">
+                                placeholder="FERRINE" value="<%= targetProject ? targetProject.brandCode : '' %>"
+                                <%=targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
                         </div>
 
                         <div class="col-md-4">
@@ -58,7 +70,8 @@
                                 class="form-label fw-bold font-monospace small text-uppercase text-secondary">Tanggal
                                 Mulai</label>
                             <input type="date" class="form-control" id="dateStart" name="dateStart" required
-                                value="<%= targetProject && targetProject.dateStart ? new Date(targetProject.dateStart).toISOString().split('T')[0] : '' %>">
+                                value="<%= targetProject && targetProject.dateStart ? new Date(targetProject.dateStart).toISOString().split('T')[0] : '' %>"
+                                <%=targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
                         </div>
 
                         <div class="col-md-4">
@@ -66,14 +79,16 @@
                                 class="form-label fw-bold font-monospace small text-uppercase text-secondary">Tanggal
                                 Selesai</label>
                             <input type="date" class="form-control" id="dateEnd" name="dateEnd" required
-                                value="<%= targetProject && targetProject.dateEnd ? new Date(targetProject.dateEnd).toISOString().split('T')[0] : '' %>">
+                                value="<%= targetProject && targetProject.dateEnd ? new Date(targetProject.dateEnd).toISOString().split('T')[0] : '' %>"
+                                <%=targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
                         </div>
 
                         <div class="col-md-4">
                             <label for="workingType"
                                 class="form-label fw-bold font-monospace small text-uppercase text-secondary">Working
                                 Type</label>
-                            <select class="form-select" id="workingType" name="workingType" required>
+                            <select class="form-select" id="workingType" name="workingType" required <%=targetProject &&
+                                targetProject.isCompleted ? 'disabled' : '' %>>
                                 <option value="OPNAME" <%=targetProject && targetProject.workingType==='OPNAME'
                                     ? 'selected' : '' %>>OPNAME</option>
                                 <option value="RECEIVING" <%=targetProject && targetProject.workingType==='RECEIVING'
@@ -88,14 +103,16 @@
                                 class="form-label fw-bold font-monospace small text-uppercase text-secondary">Deskripsi
                                 Project</label>
                             <textarea class="form-control" id="description" name="description" rows="3"
-                                placeholder="Tambahkan catatan khusus..."><%= targetProject ? targetProject.description : '' %></textarea>
+                                placeholder="Tambahkan catatan khusus..." <%=targetProject && targetProject.isCompleted
+                                ? 'disabled' : '' %>><%= targetProject ? targetProject.description : '' %></textarea>
                         </div>
 
                         <div class="col-12">
                             <div class="form-check mt-2">
                                 <input class="form-check-input" type="checkbox" id="disabled" name="disabled"
-                                    <%=targetProject && targetProject.disabled ? 'checked' : '' %>>
-                                <label class="form-check-label" for="disabled">Nonaktifkan Project</label>
+                                    <%=targetProject && targetProject.disabled ? 'checked' : '' %>
+                                <%= targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
+                                    <label class="form-check-label" for="disabled">Nonaktifkan Project</label>
                             </div>
                         </div>
 
@@ -105,13 +122,15 @@
                                     <form action="/projects/<%= targetProject.projectId %>/delete" method="POST"
                                         onsubmit="return confirm('Apakah Anda yakin ingin menghapus project ini?')"
                                         class="d-inline">
-                                        <button type="submit" class="btn btn-outline-danger">Hapus Project</button>
+                                        <button type="submit" class="btn btn-outline-danger"
+                                            <%=targetProject.isCompleted ? 'disabled' : '' %>>Hapus Project</button>
                                     </form>
                                     <% } %>
                             </div>
                             <div>
                                 <a href="/projects" class="btn btn-light me-2">Batal</a>
-                                <button type="submit" class="btn btn-primary px-4">Simpan Project</button>
+                                <button type="submit" class="btn btn-primary px-4" <%=targetProject &&
+                                    targetProject.isCompleted ? 'disabled' : '' %>>Simpan Project</button>
                             </div>
                         </div>
                     </div>

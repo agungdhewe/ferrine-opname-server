@@ -4,6 +4,8 @@ import * as deviceService from '../services/deviceService.js';
 import multer from 'multer';
 import csv from 'csv-parser';
 import fs from 'fs';
+import crypto from 'crypto';
+import fetch from 'node-fetch';
 
 const upload = multer({ dest: 'tmp/' });
 export const uploadMiddleware = upload.single('csvFile');
@@ -98,7 +100,7 @@ export const view = async (req, res, next) => {
             data.allUsers = await userService.getAllUsers();
             data.allDevices = await deviceService.getAllDevices();
         } else if (activeTab === 'summary') {
-            data.summary = await projectService.getProjectSummary(projectId);
+            data.summary = await projectService.getProjectSummary(projectId, { search: req.query.search });
         }
 
         res.render('projects/view', {
@@ -148,7 +150,7 @@ export const downloadSummary = async (req, res, next) => {
         const projectId = req.params.id;
         const delimiter = req.query.delimiter || ',';
         const project = await projectService.getProjectById(projectId);
-        const summary = await projectService.getProjectSummary(projectId);
+        const summary = await projectService.getProjectSummary(projectId, { search: req.query.search });
 
         if (!project) throw new Error('Project tidak ditemukan.');
 
@@ -224,6 +226,60 @@ export const uploadCsv = async (req, res) => {
                 res.status(500).send('Gagal mengimpor data: ' + error.message);
             }
         });
+};
+
+/**
+ * Mark Project as Completed with Webhook
+ */
+export const markAsCompleted = async (req, res, next) => {
+    try {
+        const projectId = req.params.id;
+        const { projectCode } = req.body;
+
+        const updatedProject = await projectService.markAsCompleted(projectId, projectCode, req.user.username);
+
+        // Webhook Notification
+        if (process.env.ENABLE_PROJECT_COMPLETED_WEBHOOK === 'true') {
+            const webhookUrl = process.env.PROJECT_COMPLETED_WEBHOOK_URL;
+            const secret = process.env.PROJECT_COMPLETED_WEBHOOK_SECRET || 'ferrine-secret';
+
+            if (webhookUrl) {
+                const nonce = crypto.randomBytes(16).toString('hex');
+                const timestamp = Math.floor(Date.now() / 1000);
+                const payload = JSON.stringify({
+                    projectId: updatedProject.projectId,
+                    projectCode: updatedProject.projectCode,
+                    timestamp
+                });
+
+                // Signature: HMAC-SHA256(secret, payload + nonce + timestamp)
+                const signature = crypto.createHmac('sha256', secret)
+                    .update(payload + nonce + timestamp)
+                    .digest('hex');
+
+                try {
+                    // Using Node.js built-in fetch (Node 18+)
+                    await fetch(webhookUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Webhook-Nonce': nonce,
+                            'X-Webhook-Timestamp': timestamp.toString(),
+                            'X-Webhook-Signature': signature
+                        },
+                        body: payload
+                    });
+                    console.log(`Webhook sent to ${webhookUrl} for project ${updatedProject.projectCode}`);
+                } catch (webhookError) {
+                    console.error('Webhook Failure:', webhookError.message);
+                }
+            }
+        }
+
+        res.redirect(`/projects/${projectId}`);
+    } catch (error) {
+        next(error);
+    }
 };
 
 /**

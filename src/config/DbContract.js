@@ -78,13 +78,16 @@ const DbContract = {
     ProjectHeader: createEntity('project', {
         projectId: 'projectId',
         projectCode: 'projectCode',
+        projectName: 'projectName',
         dateStart: 'dateStart',
         dateEnd: 'dateEnd',
         description: 'description',
         workingType: 'workingType',
         disabled: 'disabled',
         siteCode: 'siteCode',
-        brandCode: 'brandCode'
+        brandCode: 'brandCode',
+        isCompleted: 'isCompleted',
+        projectStatus: 'projectStatus'
     }),
     ProjectUser: createEntity('project_user', {
         projectId: 'projectId',

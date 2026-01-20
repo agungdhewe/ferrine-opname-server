@@ -89,6 +89,7 @@ CREATE TABLE "barcode" (
 CREATE TABLE "project" (
     "projectId" SERIAL PRIMARY KEY,
     "projectCode" TEXT UNIQUE NOT NULL,
+    "projectName" TEXT,
     "dateStart" DATE NOT NULL,
     "dateEnd" DATE NOT NULL,
     "description" TEXT,
@@ -96,6 +97,8 @@ CREATE TABLE "project" (
     "disabled" BOOLEAN DEFAULT FALSE,
     "siteCode" TEXT NOT NULL,
     "brandCode" TEXT NOT NULL,
+    "isCompleted" BOOLEAN DEFAULT FALSE,
+    "projectStatus" TEXT,
     -- Audit Fields
     "createdBy" TEXT,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

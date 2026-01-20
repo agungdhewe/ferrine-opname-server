@@ -105,6 +105,7 @@ EntityName (`table_name`)
 ### ProjectHeader (`project`)
 - projectId (SERIAL) [PK]
 - projectCode (TEXT) [UNIQUE]
+- projectName (TEXT)
 - dateStart (DATE)
 - dateEnd (DATE)
 - description (TEXT)
@@ -112,6 +113,8 @@ EntityName (`table_name`)
 - disabled (BOOL)
 - siteCode (TEXT)
 - brandCode (TEXT)
+- isCompleted (BOOL)
+- projectStatus (TEXT)
 
 ### ProjectUser (`project_user`)
 - projectId (SERIAL) [FK -> ProjectHeader.projectId]
@@ -262,9 +265,15 @@ DbContract:
     - bisa filter berdasarkan text dan polihan kolom yang dipilih (article, name, category, description)
     - bisa filter berdasarkan barcode (full barcode)
   - Project
+    - user bisa marking project sebagai completed
+    - project yang sudah completed tidak bisa diubah, dan tidak bisa di set kembali menjadi non-completed
+    - munculkan konfirmasi dialog ketika user marking project sebagai completed, dengan konfirmasi mengetikkan kode project.
+    - saat marking project sebagai completed, system akan mengekseskusi URL API backend dengan method POST dengan nonce dan signature, dengan parameter projectId dan projectCode, dimana alamat url dikonfigurasi di file .env
+    - ada parameter agar sistem tidak mengekseskusi API ini ketika user marking project sebagai completed di .env
+    - buat dokumentasi untuk API ini di README.md
     - menampilkan daftar detail untuk project yang dipilih
     - menampilkan daftar result untuk project yang dipilih
-    - menampilkan, menambah, menghapus daftar user untuk project yang dipilih
+    - menampilkan, menambah, menghapus daftar user untuk project yang dipilih (hanya admin yang bisa)
     - list project bisa difilter berdasarkan brandCode, siteCode, workingType, dateStart, dateEnd
     - user bisa upload item file csv dari DetailItem project, dan memilih delimiter CSV (tab, comma, semicolon, pipe) (default: comma) 
     - format file CSV adalah sebagai berikut (mirip pada upload item, namun tanpa brandCode:
@@ -276,12 +285,14 @@ DbContract:
       | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
       | 8991234000001 | FORM-COT-WHT-S | FORM01 | COTTON | WHITE | S | Kemeja Formal Slim Fit | Bahan katun stretch | Baju Formal | 250000 | 250000 | 0 | false | 50 | 0 | PRC01 |
       | 8991234000002 | FORM-COT-WHT-S | FORM01 | COTTON | WHITE | S | Kemeja Formal Slim Fit | Bahan katun stretch | Baju Formal | 250000 | 225000 | 0 | true | 10 | 0 | PRC01 |
-
+    - bisa download template item CSV sesuai format disini  
     - buat juga fitur pencarian di project detail dan project result seperti pada item   
     - tampilkan dalam tab dan paging yang rapi
     - pada project result, bisa filter text 
+
 - Summary Project
   - menampilkan ringkasan project yang dipilih, group by itemId
+  - bisa filter data berdasar itemId, article, name, description
   - download ringkasan project dalam format CSV, delimiter bisa dipilih (default: comma)
 
 

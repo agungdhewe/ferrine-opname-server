@@ -12,16 +12,27 @@
             <h1 class="fw-bold h3 mb-0 me-3">
                 <%= project.projectCode %>
             </h1>
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle me-2">
                 <%= project.workingType %>
             </span>
+            <% if (project.isCompleted) { %>
+                <span class="badge bg-success-subtle text-success border border-success-subtle">
+                    COMPLETED
+                </span>
+                <% } %>
         </div>
         <p class="text-secondary mb-0">
             <%= project.description || 'Tidak ada deskripsi.' %>
         </p>
     </div>
     <div class="col-auto">
-        <a href="/projects/<%= project.projectId %>/edit" class="btn btn-outline-secondary btn-sm">Edit Project</a>
+        <% if (!project.isCompleted) { %>
+            <button type="button" class="btn btn-success btn-sm me-2"
+                onclick="confirmCompletion('<%= project.projectId %>', '<%= project.projectCode %>')">
+                Selesaikan Proyek
+            </button>
+            <a href="/projects/<%= project.projectId %>/edit" class="btn btn-outline-secondary btn-sm">Edit Project</a>
+            <% } %>
     </div>
 </div>
 
@@ -35,14 +46,16 @@
         <a class="nav-link <%= activeTab === 'results' ? 'active fw-bold' : '' %>"
             href="/projects/<%= project.projectId %>?tab=results">Hasil Scan (History)</a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link <%= activeTab === 'users' ? 'active fw-bold' : '' %>"
-            href="/projects/<%= project.projectId %>?tab=users">User & Device</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link <%= activeTab === 'summary' ? 'active fw-bold' : '' %>"
-            href="/projects/<%= project.projectId %>?tab=summary">Ringkasan (Summary)</a>
-    </li>
+    <% if (user.isAdmin) { %>
+        <li class="nav-item">
+            <a class="nav-link <%= activeTab === 'users' ? 'active fw-bold' : '' %>"
+                href="/projects/<%= project.projectId %>?tab=users">User & Device</a>
+        </li>
+        <% } %>
+            <li class="nav-item">
+                <a class="nav-link <%= activeTab === 'summary' ? 'active fw-bold' : '' %>"
+                    href="/projects/<%= project.projectId %>?tab=summary">Ringkasan (Summary)</a>
+            </li>
 </ul>
 
 <div class="tab-content">
@@ -69,10 +82,12 @@
                 </div>
             </div>
             <div class="col-md-4 text-end">
-                <button type="button" class="btn btn-outline-success h-100 px-4" data-bs-toggle="modal"
-                    data-bs-target="#uploadModal">
-                    <i class="me-1">↑</i> Upload CSV Item
-                </button>
+                <% if (!project.isCompleted) { %>
+                    <button type="button" class="btn btn-outline-success h-100 px-4" data-bs-toggle="modal"
+                        data-bs-target="#uploadModal">
+                        <i class="me-1">↑</i> Upload CSV Item
+                    </button>
+                    <% } %>
             </div>
         </div>
 
@@ -258,40 +273,46 @@
                 <% } %>
 
                     <!-- 3. TAB USERS -->
-                    <% if (activeTab==='users' ) { %>
+                    <% if (activeTab==='users' && user.isAdmin) { %>
                         <div class="row">
                             <div class="col-lg-4">
-                                <div class="card border-0 shadow-sm">
-                                    <div class="card-header bg-white fw-bold">Tambah Akses User</div>
-                                    <div class="card-body">
-                                        <form action="/projects/<%= project.projectId %>/users/assign" method="POST">
-                                            <div class="mb-3">
-                                                <label class="form-label small text-uppercase text-secondary">Pilih
-                                                    User</label>
-                                                <select name="username" class="form-select" required>
-                                                    <% allUsers.forEach(function(u) { if (!u.disabled) { %>
-                                                        <option value="<%= u.username %>">
-                                                            <%= u.fullname %> (<%= u.username %>)
-                                                        </option>
-                                                        <% } }); %>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label small text-uppercase text-secondary">Pilih
-                                                    Device</label>
-                                                <select name="deviceId" class="form-select" required>
-                                                    <% allDevices.forEach(function(d) { if (!d.disabled) { %>
-                                                        <option value="<%= d.deviceId %>">
-                                                            <%= d.name %>
-                                                        </option>
-                                                        <% } }); %>
-                                                </select>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary w-100">Tambah ke
-                                                Project</button>
-                                        </form>
+                                <% if (!project.isCompleted) { %>
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-header bg-white fw-bold">Tambah Akses User</div>
+                                        <div class="card-body">
+                                            <form action="/projects/<%= project.projectId %>/users/assign"
+                                                method="POST">
+                                                <div class="mb-3">
+                                                    <label class="form-label small text-uppercase text-secondary">Pilih
+                                                        User</label>
+                                                    <select name="username" class="form-select" required>
+                                                        <% allUsers.forEach(function(u) { if (!u.disabled) { %>
+                                                            <option value="<%= u.username %>">
+                                                                <%= u.fullname %> (<%= u.username %>)
+                                                            </option>
+                                                            <% } }); %>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label small text-uppercase text-secondary">Pilih
+                                                        Device</label>
+                                                    <select name="deviceId" class="form-select" required>
+                                                        <% allDevices.forEach(function(d) { if (!d.disabled) { %>
+                                                            <option value="<%= d.deviceId %>">
+                                                                <%= d.name %>
+                                                            </option>
+                                                            <% } }); %>
+                                                    </select>
+                                                </div>
+                                                <button type="submit" class="btn btn-primary w-100">Tambah ke
+                                                    Project</button>
+                                            </form>
+                                        </div>
                                     </div>
-                                </div>
+                                    <% } else { %>
+                                        <div class="alert alert-info">Project sudah selesai. Pengaturan user & device
+                                            dikunci.</div>
+                                        <% } %>
                             </div>
                             <div class="col-lg-8">
                                 <div class="card border-0 shadow-sm">
@@ -330,17 +351,19 @@
                                                                         : 'Belum pernah' %>
                                                                 </td>
                                                                 <td class="text-end pe-4">
-                                                                    <form
-                                                                        action="/projects/<%= project.projectId %>/users/remove"
-                                                                        method="POST" class="d-inline">
-                                                                        <input type="hidden" name="username"
-                                                                            value="<%= u.username %>">
-                                                                        <input type="hidden" name="deviceId"
-                                                                            value="<%= u.deviceId %>">
-                                                                        <button type="submit"
-                                                                            class="btn btn-sm btn-outline-danger"
-                                                                            onclick="return confirm('Hapus akses user ini?')">Hapus</button>
-                                                                    </form>
+                                                                    <% if (!project.isCompleted) { %>
+                                                                        <form
+                                                                            action="/projects/<%= project.projectId %>/users/remove"
+                                                                            method="POST" class="d-inline">
+                                                                            <input type="hidden" name="username"
+                                                                                value="<%= u.username %>">
+                                                                            <input type="hidden" name="deviceId"
+                                                                                value="<%= u.deviceId %>">
+                                                                            <button type="submit"
+                                                                                class="btn btn-sm btn-outline-danger"
+                                                                                onclick="return confirm('Hapus akses user ini?')">Hapus</button>
+                                                                        </form>
+                                                                        <% } %>
                                                                 </td>
                                                             </tr>
                                                             <% }); %>
@@ -354,11 +377,29 @@
 
                             <!-- 4. TAB SUMMARY -->
                             <% if (activeTab==='summary' ) { %>
+                                <div class="card p-3 mb-4 bg-light border-0">
+                                    <form action="/projects/<%= project.projectId %>" method="GET" class="row g-2">
+                                        <input type="hidden" name="tab" value="summary">
+                                        <div class="col-md-6">
+                                            <input type="text" name="search" class="form-control"
+                                                placeholder="Cari Item ID, Nama, Article, atau Deskripsi..."
+                                                value="<%= filters.search || '' %>">
+                                        </div>
+                                        <div class="col-auto">
+                                            <button type="submit" class="btn btn-primary">Cari</button>
+                                            <% if (filters.search) { %>
+                                                <a href="/projects/<%= project.projectId %>?tab=summary"
+                                                    class="btn btn-link text-secondary">Reset</a>
+                                                <% } %>
+                                        </div>
+                                    </form>
+                                </div>
                                 <div class="card border-0 shadow-sm">
                                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                         <span class="fw-bold">Ringkasan Perolehan Stok</span>
                                         <form action="/projects/<%= project.projectId %>/summary/download" method="GET"
                                             class="d-flex gap-2">
+                                            <input type="hidden" name="search" value="<%= filters.search || '' %>">
                                             <select name="delimiter" class="form-select form-select-sm"
                                                 style="width: auto;">
                                                 <option value=",">Comma (,)</option>
@@ -417,3 +458,39 @@
                                 </div>
                                 <% } %>
 </div>
+
+<script>
+    function confirmCompletion(projectId, projectCode) {
+        Swal.fire({
+            title: 'Selesaikan Proyek?',
+            text: `Ketikkan Kode Proyek "${projectCode}" untuk konfirmasi. Status proyek yang sudah selesai tidak dapat diubah kembali.`,
+            input: 'text',
+            inputPlaceholder: 'Masukkan Kode Proyek...',
+            showCancelButton: true,
+            confirmButtonText: 'Selesaikan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#198754',
+            preConfirm: (value) => {
+                if (value !== projectCode) {
+                    Swal.showValidationMessage('Kode Proyek tidak sesuai!');
+                }
+                return value;
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/projects/${projectId}/complete`;
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'projectCode';
+                input.value = projectCode;
+
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+</script>

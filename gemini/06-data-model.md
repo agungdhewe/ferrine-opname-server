@@ -63,6 +63,7 @@ EntityName (`table_name`)
 ### ProjectHeader (`project`)
 - projectId (SERIAL) [PK]
 - projectCode (TEXT) [UNIQUE]
+- projectName (TEXT)
 - dateStart (DATE)
 - dateEnd (DATE)
 - description (TEXT)
@@ -70,6 +71,8 @@ EntityName (`table_name`)
 - disabled (BOOL)
 - siteCode (TEXT)
 - brandCode (TEXT)
+- isCompleted (BOOL)
+- projectStatus (TEXT)
 
 ### ProjectUser (`project_user`)
 - projectId (SERIAL) [FK -> ProjectHeader.projectId]

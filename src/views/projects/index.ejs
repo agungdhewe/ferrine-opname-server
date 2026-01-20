@@ -51,7 +51,7 @@
         <table class="table table-hover align-middle mb-0">
             <thead class="bg-light">
                 <tr>
-                    <th class="ps-4">Project Code</th>
+                    <th class="ps-4">Project</th>
                     <th>Site</th>
                     <th>Brand</th>
                     <th>Rentang Waktu</th>
@@ -68,10 +68,16 @@
                     <% } %>
                         <% projects.forEach(p=> { %>
                             <tr>
-                                <td class="ps-4 fw-bold">
-                                    <a href="/projects/<%= p.projectId %>" class="text-decoration-none text-dark">
-                                        <%= p.projectCode %>
-                                    </a>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">
+                                        <a href="/projects/<%= p.projectId %>"
+                                            class="text-decoration-none text-primary">
+                                            <%= p.projectCode %>
+                                        </a>
+                                    </div>
+                                    <div class="small fw-medium text-muted">
+                                        <%= p.projectName || '-' %>
+                                    </div>
                                 </td>
                                 <td><span class="badge bg-secondary-subtle text-secondary">
                                         <%= p.siteCode %>
@@ -89,24 +95,29 @@
                                 <td>
                                     <% if (p.disabled) { %>
                                         <span class="badge bg-danger-subtle text-danger">Nonaktif</span>
-                                        <% } else { %>
-                                            <% const now=new Date(); if (now> new Date(p.dateEnd)) { %>
-                                                <span class="badge bg-secondary-subtle text-secondary">Selesai</span>
-                                                <% } else if (now < new Date(p.dateStart)) { %>
-                                                    <span class="badge bg-warning-subtle text-warning">Akan
-                                                        Datang</span>
-                                                    <% } else { %>
-                                                        <span
-                                                            class="badge bg-success-subtle text-success">Berjalan</span>
-                                                        <% } %>
+                                        <% } else if (p.isCompleted) { %>
+                                            <span class="badge bg-success text-white">Selesai (Final)</span>
+                                            <% } else { %>
+                                                <% const now=new Date(); if (now> new Date(p.dateEnd)) { %>
+                                                    <span
+                                                        class="badge bg-secondary-subtle text-secondary">Berakhir</span>
+                                                    <% } else if (now < new Date(p.dateStart)) { %>
+                                                        <span class="badge bg-warning-subtle text-warning">Akan
+                                                            Datang</span>
+                                                        <% } else { %>
+                                                            <span
+                                                                class="badge bg-success-subtle text-success">Berjalan</span>
                                                             <% } %>
+                                                                <% } %>
                                 </td>
                                 <td class="text-end pe-4">
                                     <div class="btn-group">
                                         <a href="/projects/<%= p.projectId %>"
                                             class="btn btn-sm btn-outline-info">View</a>
-                                        <a href="/projects/<%= p.projectId %>/edit"
-                                            class="btn btn-sm btn-outline-secondary">Edit</a>
+                                        <% if (!p.isCompleted) { %>
+                                            <a href="/projects/<%= p.projectId %>/edit"
+                                                class="btn btn-sm btn-outline-secondary text-primary">Edit</a>
+                                            <% } %>
                                     </div>
                                 </td>
                             </tr>
