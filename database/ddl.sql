@@ -161,7 +161,7 @@ CREATE TABLE "project_result" (
 -- or actual hashes if provided. Since user asked for 'rahasia123', I will provide a valid bcrypt hash if possible.
 
 INSERT INTO "user" ("username", "fullname", "password", "isAdmin", "allowOpname", "createdBy") VALUES
-('admin', 'Administrator', '$2b$10$Xm7B/yX/2h7u/p/y/O8uHeD0v8X.f0X0O0X0O0X0O0X0O0X0O0X0', TRUE, TRUE, 'system'),
-('user', 'Regular User', '$2b$10$Xm7B/yX/2h7u/p/y/O8uHeD0v8X.f0X0O0X0O0X0O0X0O0X0O0X0', FALSE, TRUE, 'system');
+('admin', 'Administrator', '$2b$10$2wCK3W5LoYQBQUQNwHXIUe..TW/VrYq5GOFaOmQcSDR/avTwMdG2a', TRUE, TRUE, 'system'),
+('user', 'Regular User', '$2b$10$2wCK3W5LoYQBQUQNwHXIUe..TW/VrYq5GOFaOmQcSDR/avTwMdG2a', FALSE, TRUE, 'system');
 
 -- Note: The hash above is a placeholder. In a real scenario, use actual bcrypt hashes of 'rahasia123'.

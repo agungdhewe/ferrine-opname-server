@@ -13,6 +13,7 @@ export const login = async (username, password) => {
     try {
         const userTable = DbContract.User.TABLE;
         const col = DbContract.User.Columns;
+        const key = DbContract.User.Keys;
 
         const sql = `
             SELECT ${col.username}, ${col.fullname}, ${col.password}, ${col.isAdmin}, ${col.disabled}
@@ -28,20 +29,20 @@ export const login = async (username, password) => {
 
         const user = result.rows[0];
 
-        if (user[col.disabled]) {
+        if (user[key.disabled]) {
             return { success: false, message: 'Akun Anda dinonaktifkan' };
         }
 
-        const isMatch = await bcrypt.compare(password, user[col.password]);
+        const isMatch = await bcrypt.compare(password, user[key.password]);
         if (!isMatch) {
             return { success: false, message: 'Password salah' };
         }
 
         const token = jwt.sign(
             {
-                username: user[col.username],
-                fullname: user[col.fullname],
-                isAdmin: user[col.isAdmin]
+                username: user[key.username],
+                fullname: user[key.fullname],
+                isAdmin: user[key.isAdmin]
             },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN }
