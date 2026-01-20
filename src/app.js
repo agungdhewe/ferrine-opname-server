@@ -7,6 +7,8 @@ import dotenv from 'dotenv';
 import { errorHandler, notFound } from './middlewares/errorMiddleware.js';
 import authRoutes from './routes/authRoutes.js';
 import indexRoutes from './routes/indexRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import deviceRoutes from './routes/deviceRoutes.js';
 
 dotenv.config();
 
@@ -30,6 +32,8 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Routes
 app.use('/', authRoutes);
 app.use('/', indexRoutes);
+app.use('/users', userRoutes);
+app.use('/devices', deviceRoutes);
 
 // Error Handling
 app.use(notFound);

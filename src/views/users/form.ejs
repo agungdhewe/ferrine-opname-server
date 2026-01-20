@@ -1,0 +1,119 @@
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="/users">Users</a></li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <%= targetUser ? 'Edit User' : 'Tambah User' %>
+                </li>
+            </ol>
+        </nav>
+        <h1 class="fw-bold h3">
+            <%= targetUser ? 'Edit Pengguna' : 'Tambah Pengguna Baru' %>
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card p-4">
+            <form action="<%= targetUser ? '/users/' + targetUser.username : '/users' %>" method="POST">
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username"
+                            value="<%= targetUser ? targetUser.username : '' %>" <%=targetUser ? 'readonly' : 'required'
+                            %> placeholder="jdoe">
+                        <% if (targetUser) { %>
+                            <div class="form-text">Username tidak dapat diubah.</div>
+                            <% } %>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="fullname" class="form-label">Nama Lengkap</label>
+                        <input type="text" class="form-control" id="fullname" name="fullname"
+                            value="<%= targetUser ? targetUser.fullname : '' %>" required placeholder="John Doe">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" <%=targetUser ? ''
+                            : 'required' %> placeholder="<%= targetUser ? 'Biarkan kosong jika tidak diubah'
+                            : 'Min. 6 karakter' %>">
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <h6 class="fw-bold mb-3 border-bottom pb-2">Izin & Peran</h6>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="isAdmin" name="isAdmin" <%=targetUser &&
+                                targetUser.isAdmin ? 'checked' : '' %>>
+                            <label class="form-check-label" for="isAdmin">Administrator</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="disabled" name="disabled" <%=targetUser
+                                && targetUser.disabled ? 'checked' : '' %>>
+                            <label class="form-check-label" for="disabled">Nonaktifkan Akun</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <h6 class="fw-bold mb-3 border-bottom pb-2">Fitur yang Diizinkan (Non-Admin)</h6>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="allowOpname" name="allowOpname"
+                                <%=targetUser && targetUser.allowOpname ? 'checked' : '' %>>
+                            <label class="form-check-label" for="allowOpname">Stock Opname Scan</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="allowReceiving" name="allowReceiving"
+                                <%=targetUser && targetUser.allowReceiving ? 'checked' : '' %>>
+                            <label class="form-check-label" for="allowReceiving">Receiving (Penerimaan)</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="allowTransfer" name="allowTransfer"
+                                <%=targetUser && targetUser.allowTransfer ? 'checked' : '' %>>
+                            <label class="form-check-label" for="allowTransfer">Transfer Barang</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mt-2">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="allowPrintLabel" name="allowPrintLabel"
+                                <%=targetUser && targetUser.allowPrintLabel ? 'checked' : '' %>>
+                            <label class="form-check-label" for="allowPrintLabel">Cetak Label</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-5">
+                        <button type="submit" class="btn btn-primary px-4 py-2">Simpan Perubahan</button>
+                        <a href="/users" class="btn btn-link text-secondary">Batal</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card p-4 bg-light border-0">
+            <h6 class="fw-bold mb-3">Informasi Peran</h6>
+            <ul class="small text-secondary ps-3">
+                <li class="mb-2"><strong>Administrator</strong> memiliki akses penuh ke manajemen user, device, dan
+                    item.</li>
+                <li class="mb-2">Izin fitur lainnya berlaku untuk user non-admin agar dapat mengakses modul di perangkat
+                    mobile.</li>
+                <li>Akun yang dinonaktifkan tidak akan bisa login ke sistem web maupun mobile.</li>
+            </ul>
+        </div>
+    </div>
+</div>

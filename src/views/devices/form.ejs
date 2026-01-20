@@ -1,0 +1,75 @@
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="/devices">Devices</a></li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <%= targetDevice ? 'Edit Device' : 'Tambah Device' %>
+                </li>
+            </ol>
+        </nav>
+        <h1 class="fw-bold h3">
+            <%= targetDevice ? 'Edit Perangkat' : 'Tambah Perangkat Baru' %>
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card p-4">
+            <form action="<%= targetDevice ? '/devices/' + targetDevice.deviceId : '/devices' %>" method="POST">
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="name" class="form-label">Nama Perangkat</label>
+                        <input type="text" class="form-control" id="name" name="name"
+                            value="<%= targetDevice ? targetDevice.name : '' %>" required
+                            placeholder="Contoh: PDA Warehouse 01">
+                    </div>
+
+                    <div class="col-12">
+                        <label for="secret" class="form-label">Secret Key (Opsional)</label>
+                        <input type="text" class="form-control" id="secret" name="secret"
+                            value="<%= targetDevice ? targetDevice.secret : '' %>"
+                            placeholder="Kunci otentikasi hardware">
+                        <div class="form-text">Digunakan untuk validasi keamanan saat sinkronisasi dari mobile.</div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <div class="form-check form-switch p-3 bg-light rounded">
+                            <input class="form-check-input ms-0 me-2" type="checkbox" id="disabled" name="disabled"
+                                <%=targetDevice && targetDevice.disabled ? 'checked' : '' %>>
+                            <label class="form-check-label fw-medium" for="disabled">Nonaktifkan Perangkat</label>
+                            <p class="small text-muted mb-0 mt-1">Jika dinonaktifkan, perangkat ini tidak akan bisa
+                                melakukan sinkronisasi data opname.</p>
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-5">
+                        <button type="submit" class="btn btn-primary px-4 py-2">Simpan Perangkat</button>
+                        <a href="/devices" class="btn btn-link text-secondary">Batal</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card p-4 border-0 bg-info-subtle">
+            <h6 class="fw-bold mb-3"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                    class="bi bi-info-circle-fill me-2" viewBox="0 0 16 16">
+                    <path
+                        d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z" />
+                </svg>Tentang Manajemen Device</h6>
+            <p class="small mb-2">Setiap perangkat mobile (Handheld/PDA) yang digunakan untuk opname wajib didaftarkan
+                di sini.</p>
+            <ul class="small mb-0 ps-3">
+                <li class="mb-2">Nama perangkat sebaiknya unik dan mudah diidentifikasi (misal: Lokasi + No Unit).</li>
+                <li class="mb-2"><strong>Secret Key</strong> dapat digunakan sebagai lapisan keamanan tambahan pada
+                    aplikasi mobile.</li>
+                <li>Sesuai aturan bisnis, perangkat tidak dapat dihapus permanen, hanya dapat dinonaktifkan (Soft
+                    Delete).</li>
+            </ul>
+        </div>
+    </div>
+</div>
