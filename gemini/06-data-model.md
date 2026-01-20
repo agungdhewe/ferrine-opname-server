@@ -43,6 +43,13 @@ EntityName (`table_name`)
 - disabled (BOOL)
 - description (TEXT)
 - category (TEXT)
+- price (DECIMAL)
+- sellPrice (DECIMAL)
+- discount (DECIMAL)
+- isSpecialPrice (BOOL)
+- stockQty (INT)
+- printQty (INT)
+- pricingId (TEXT)
 
 
 ### Barcode (`barcode`)

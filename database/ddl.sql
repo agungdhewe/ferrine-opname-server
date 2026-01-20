@@ -56,6 +56,13 @@ CREATE TABLE "item" (
     "disabled" BOOLEAN DEFAULT FALSE,
     "description" TEXT,
     "category" TEXT,
+    "price" DECIMAL(15,2),
+    "sellPrice" DECIMAL(15,2),
+    "discount" DECIMAL(15,2),
+    "isSpecialPrice" BOOLEAN DEFAULT FALSE,
+    "stockQty" INT DEFAULT 0,
+    "printQty" INT DEFAULT 0,
+    "pricingId" TEXT,
     -- Audit Fields
     "createdBy" TEXT,
     "createdAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

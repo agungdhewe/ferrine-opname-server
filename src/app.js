@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes.js';
 import indexRoutes from './routes/indexRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import deviceRoutes from './routes/deviceRoutes.js';
+import itemRoutes from './routes/itemRoutes.js';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/', authRoutes);
 app.use('/', indexRoutes);
 app.use('/users', userRoutes);
 app.use('/devices', deviceRoutes);
+app.use('/items', itemRoutes);
 
 // Error Handling
 app.use(notFound);

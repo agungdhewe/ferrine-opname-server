@@ -11,11 +11,13 @@
     "dependencies": {
         "bcrypt": "^5.1.1",
         "cookie-parser": "^1.4.7",
+        "csv-parser": "^3.2.0",
         "dotenv": "^16.4.7",
         "ejs": "^3.1.10",
         "express": "^4.21.2",
         "express-ejs-layouts": "^2.5.1",
         "jsonwebtoken": "^9.0.2",
+        "multer": "^2.0.2",
         "pg": "^8.13.1",
         "redis": "^4.7.0"
     },

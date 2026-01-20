@@ -60,7 +60,14 @@ const DbContract = {
         name: 'name',
         disabled: 'disabled',
         description: 'description',
-        category: 'category'
+        category: 'category',
+        price: 'price',
+        sellPrice: 'sellPrice',
+        discount: 'discount',
+        isSpecialPrice: 'isSpecialPrice',
+        stockQty: 'stockQty',
+        printQty: 'printQty',
+        pricingId: 'pricingId'
     }),
     Barcode: createEntity('barcode', {
         barcodeId: 'barcodeId',

@@ -1,0 +1,86 @@
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="/items">Items</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Barcodes</li>
+            </ol>
+        </nav>
+        <h1 class="fw-bold h3 d-flex align-items-center">
+            Daftar Barcode: <span class="ms-2 badge bg-primary-subtle text-primary border border-primary-subtle">
+                <%= item.itemId %>
+            </span>
+        </h1>
+        <p class="text-secondary">
+            <%= item.name %> - <%= item.brandCode %>
+        </p>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary" hx-get="/items/<%= item.itemId %>/barcodes/add" hx-target="#barcodeModalBody"
+            data-bs-toggle="modal" data-bs-target="#barcodeModal">
+            Tambah Barcode
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">No. Barcode</th>
+                            <th>Brand Code</th>
+                            <th>Ditambahkan pada</th>
+                            <th class="text-end pe-4">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (barcodes.length===0) { %>
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">Belum ada barcode untuk item ini.
+                                </td>
+                            </tr>
+                            <% } %>
+                                <% barcodes.forEach(b=> { %>
+                                    <tr>
+                                        <td class="ps-4 fw-bold font-monospace">
+                                            <%= b.barcode %>
+                                        </td>
+                                        <td><span class="badge bg-secondary-subtle text-secondary">
+                                                <%= b.brandCode %>
+                                            </span></td>
+                                        <td class="text-secondary small">
+                                            <%= new Date(b.createdAt).toLocaleDateString('id-ID') %>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <form action="/items/barcodes/<%= b.barcodeId %>/delete" method="POST"
+                                                class="d-inline" onsubmit="return confirm('Hapus barcode ini?')">
+                                                <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Placeholder (for future dynamic barcode adding) -->
+<div class="modal fade" id="barcodeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kelola Barcode</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div id="barcodeModalBody" class="modal-body text-center p-5">
+                <div class="text-muted small">Fitur penambahan barcode satu-per-satu akan segera tersedia.</div>
+            </div>
+        </div>
+    </div>
+</div>
