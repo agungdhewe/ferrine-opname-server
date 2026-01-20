@@ -3,30 +3,21 @@ Dokumen ini adalah panduan konteks bagi asisten AI (Gemini) untuk memahami atura
 ---
 
 ---
-## Project Overview
-- Web based Application
-- Backend: Node.js (Express)
-- Use case: Stock Opname multi-device multi-store
-- Support horizontal scaling
-
-
+## 🏗️ Project Overview & Architecture
+- **Type:** Web-based Enterprise Stock Opname
+- **Backend:** Node.js (Express.js) - Full ES6 Modules (`import/export`)
+- **Database:** PostgreSQL 16 (Relational Integrity)
+- **Cache/Session:** Redis (Speed & Token Blacklisting)
+- **Scale:** Dirancang untuk horizontal scaling
 ---
-## Tech Stack Utama
-- **Runtime:** Node.js (Full ES6 Modules - `import/export`)
-- **Framework:** Express.js
-- **Template Engine:** EJS
-- **Client Framework:** Bootstrap 5
-- **Database:** PostgreSQL 16
-- **Cache & Session:** Redis
-- **Auth:** JSON Web Token (JWT) & bcrypt untuk hashing password
-
-
-
+## 🛠️ Tech Stack & UI Standards
+- **Template Engine:** EJS (Server Side Rendering)
+- **Client Framework:** Bootstrap 5, HTMX (untuk interaksi parsial tanpa reload)
+- **Components:** DataTables (Grid), Select2 (Searchable Dropdown), SweetAlert2 (Notif), Inputmask (Currency/Qty)
+- **Auth:** JWT (Stateless) + bcrypt (Hashing)
 ---
 ## Standar Penulisan Kode
-- **JavaScript:** Gunakan `ES6` baik di server maupun client.
 - **Variabel & Fungsi:** Gunakan `camelCase`.
-- **Asynchronous:** Wajib menggunakan `async/await`.
 - **Error Handling:** Wajib menggunakan blok `try { ... } catch (error) { ... }` pada setiap fungsi.
 - **Data Credentials:** Untuk server side, dilarang keras menulis data sensitif di dalam kode. Gunakan `process.env` (file `.env`).
 - **Dokumentasi:** Gunakan komentar JSDoc dalam **Bahasa Indonesia**.
@@ -42,44 +33,34 @@ Dokumen ini adalah panduan konteks bagi asisten AI (Gemini) untuk memahami atura
 
 
 ---
-## UI Component
-- **Layout UI:** Bootstrap 5
-- **Tabel data:** DataTables
-- **Dropdown search:** Select2
-- **Input harga:** Inputmask
-- **Notifikasi:** SweetAlert2
-- **Interaksi tanpa reload:** HTMX (opsional)
-
-
----
-## Global Data Rules
-- Semua data harus dapat diaudit siapa creator dan yang terakhir update
-- semua perubahan data harus di log
-- tidak ada hard delete untuk:
-  - ProjectHeader
-  - ProjectResult
-  - ProjectDetail
-
-
+## 🔐 Security & Auth Rules (Strict)
+1. **No Anonymous Access:** Semua endpoint (kecuali `/login`) wajib melewati Middleware Autentikasi.
+2. **RBAC (Role-Based Access Control):** Pengecekan flag user (`isAdmin`, `allowOpname`, dll) dilakukan di level middleware sebelum masuk ke controller.
+3. **Token Revocation:** Gunakan Redis untuk menyimpan 'Blacklisted Tokens' saat user logout atau akun di-disable.
+4. **Credential Safety:** Dilarang hardcode kredensial. Gunakan `.env`.
 ---
 ## Data Model
 
 Dokumen ini mendefinisikan **logical data model** dan **aturan (rules)**  
-sebagai kontrak antara **Android App**, **Backend API**, dan **Database**.
+sebagai kontrak antara **Opname Web App**, **Backend Service**, dan **Database**.
 
-### Device
+format:
+EntityName (`table_name`)
+- fieldName : DataType [PK/FK] [Description]
 
-- deviceId : INT        [PK]
-- name     : TEXT
+
+### Device (`device`)
+- deviceId : INT [PK] AUTO_INCREMENT
+- name : TEXT [UNIQUE]
+- secret : TEXT
 - disabled : BOOL
-```text
-Rules:
-- Device dapat dinonaktifkan tanpa dihapus
-```
+- createBy : TEXT
+- createdAt : TIMESTAMP
+- updateBy : TEXT
+- updatedAt : TIMESTAMP
 
 
----
-### User
+### User (`user`)
 - username (TEXT) [PK]
 - fullname (TEXT)
 - password (TEXT) [HASHED]
@@ -89,64 +70,55 @@ Rules:
 - allowTransfer (BOOL)
 - allowPrintLabel (BOOL)
 - disabled (BOOL)
+- createBy : TEXT
+- createdAt : TIMESTAMP
+- updateBy : TEXT
+- updatedAt : TIMESTAMP
 
-```text
-Rules:
-- password harus hashed
-```
----
-### UserDevice
-- username (TEXT) [FK -> User.username]
-- deviceId (INT) [FK -> Device.deviceId]
-``` text
-Rules:
-- satu user bisa mengakses banyak device
-- kombinasi (username, deviceId) unik
-```
 
----
-### Item
+### Item (`item`)
 - itemId (TEXT) [PK]
 - article (TEXT)
 - material (TEXT)
 - color (TEXT)
 - size (TEXT)
 - name (TEXT)
+- disabled (BOOL)
 - description (TEXT)
 - category (TEXT)
+- createBy : TEXT
+- createdAt : TIMESTAMP
+- updateBy : TEXT
+- updatedAt : TIMESTAMP
 
-```text
-Rules:
-- itemId immutable
-```
----
-### Barcode
+
+### Barcode (`barcode`)
 - itemId (TEXT) [FK -> Item.itemId]
 - barcode (TEXT)
-```text
-Rules:
-- barcode unik
-- barcode tidak boleh diubah
-- satu item bisa punya banyak barcode
-```
----
-### ProjectHeader
+
+
+### ProjectHeader (`project`)
 - projectId (TEXT) [PK]
 - dateStart (DATE)
 - dateEnd (DATE)
 - description (TEXT)
 - workingType (TEXT)
 - disabled (BOOL)
+- isDeleted (BOOL)
 - siteCode (TEXT)
 - brandCode (TEXT)
-```text
-Rules:
-- satu project aktif per site + brand
-- project disabled = true → semua transaksi ditolak
-- projectId immutable
-```
----
-### ProjectDetail
+- createBy : TEXT
+- createdAt : TIMESTAMP
+- updateBy : TEXT
+- updatedAt : TIMESTAMP
+
+### ProjectUser (`project_user`)
+- projectId (TEXT) [FK -> ProjectHeader.projectId]
+- username (TEXT) [FK -> User.username]
+- deviceId (INT) [FK -> Device.deviceId]
+- lastSync (TIMESTAMP)
+
+### ProjectDetail (`project_detil`)
 - projectId (TEXT) [FK -> ProjectHeader.projectId]
 - itemId (TEXT) [FK -> Item.itemId]
 - price (DECIMAL)
@@ -156,36 +128,57 @@ Rules:
 - stockQty (INT)
 - printQty (INT)
 - pricingId (TEXT)
-```text
-- kombinasi (projectId, itemId) unik
-- printQty hanya untuk label
-- stockQty digunakan untuk opname, receiving, transfer
-pricingId referensi pricing aktif
-```
 
----
-### ProjectResult
+
+
+### ProjectResult (`project_result`)
 - projectId (TEXT) [FK -> ProjectHeader.projectId]
 - itemId (TEXT) [FK -> Item.itemId]
 - deviceId (INT) [FK -> Device.deviceId]
+- username (TEXT) [FK -> User.username]
 - timestamp (TIMESTAMP)
 - barcode (TEXT)
 - scannedQty (INT)
-```text
-Rules:
-- kombinasi (projectId, itemId, deviceId, barcode) unik
-- scannedQty tidak boleh diubah
-- barcode tidak boleh diubah
-- deviceId tidak boleh diubah
-- projectId tidak boleh diubah
-- itemId tidak boleh diubah
-```
+
 ---
 ## Relasi Data
 - User 1---N UserDevice N---1 Device
 - Item 1---N Barcode
+- ProjectHeader 1---N ProjectUser
 - ProjectHeader 1---N ProjectDetail
 - ProjectHeader 1---N ProjectResult
+---
+## 📊 Business Rules
+
+### Core Tables & Integrity
+- **Device:** 
+  - device tidak boleh dihapus, hanya bisa dinonaktifkan.
+- **User:** 
+  - user tidak boleh dihapus, hanya bisa dinonaktifkan.
+  - satu user bisa memiliki banyak device.
+- **Item & Barcode:** 
+`itemId` [PK] bersifat Immutable. Satu Item bisa memiliki banyak Barcode (1-N).
+- **Project:**
+  - **ProjectHeader:**
+    - satu `projectHeader` bisa memiliki banyak `projectDetail`.
+    - satu `projectHeader` bisa memiliki banyak `projectResult`.
+    - `dateStart` tidak boleh lebih dari `dateEnd`.
+    - `siteCode` dan `brandCode` tidak boleh kosong.
+    - kombinasi `siteCode`, `brandCode` tidak boleh ada di rentang waktu `dateStart` dan `dateEnd` yang sama.
+    - saat sudah ada data di `projectResult` dan `projectDetail`, maka `projectHeader` tidak boleh diubah lagi.
+    - **Anti-Hard Delete:** Dilarang menggunakan `DELETE`. Gunakan flag `isDeleted = true`.
+  - **ProjectUser:**
+    - kombinasi `projectId`, `username`, `deviceId` harus unik.
+  - **ProjectDetail:**
+    - kombinasi `projectId`, `barcode` harus unik.
+  - **ProjectResult:** (Transaction Table) 
+    - kombinasi `projectId`, `deviceId`, `timestamp` harus unik.
+    - Gunakan `UPSERT` logic (Update if exist, Insert if new) untuk `scannedQty`.
+    - `projectResult` bersifat read-only, dan tidak boleh dimodifikasi user.
+
+### 🛡️ Global Data Rules
+- **Audit Trail:** Setiap mutasi data (Insert/Update) pada Project dan Item wajib mencatat `createdBy`, `createdAt`, `updatedBy`, `updatedAt`.
+- **Transactions:** Semua operasi yang melibatkan `ProjectHeader`, `ProjectDetail` dan `ProjectResult` secara bersamaan wajib dibungkus dalam **Database Transaction**.`
 ---
 ## Data Contract Rules
 
@@ -224,6 +217,35 @@ DbContract:
 - Semua query harus melalui layer repository / DAO
 - Code review wajib memverifikasi penggunaan DbContract
 - Static analysis / lint rule direkomendasikan
+
+---
+## Fitur
+- user harus login untuk bisa akses program ini
+- Dashboard
+  - menampilkan jumlah user aktif, device aktif, item aktif
+  - menampilkan jumlah project yang sedang berjalan
+- CRUD  
+  - User
+    - hanya admin yang akses program ini
+  - Device
+    - hanya admin yang akses program ini
+  - Item
+    - hanya admin yang bisa create, update, delete
+    - menampilkan daftar barcode untuk item yang dipilih
+    - bisa upload item dari file CSV
+    - bisa memilih delimiter CSV (default: comma)
+  - Project
+    - menampilkan daftar detail untuk project yang dipilih
+    - menampilkan daftar result untuk project yang dipilih
+    - menampilkan, menambah, menghapus daftar user untuk project yang dipilih
+    - list project bisa difilter berdasarkan brandCode, siteCode, workingType, dateStart, dateEnd
+    - tampilkan dalam tab dan paging yang rapi
+    - pada project result, bisa filter text 
+- Summary Project
+  - menampilkan ringkasan project yang dipilih, group by itemId
+  - download ringkasan project dalam format CSV, delimiter bisa dipilih (default: comma)
+
+
 
 ---
 ## Instruksi Khusus untuk AI
