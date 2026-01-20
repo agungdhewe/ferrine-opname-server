@@ -1,0 +1,21 @@
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8">
+        <div class="card p-5 text-center">
+            <h1 class="display-1 fw-bold text-danger mb-4">Oops!</h1>
+            <h4 class="fw-bold mb-3">
+                <%= message %>
+            </h4>
+
+            <% if (locals.error && error.stack) { %>
+                <div class="text-start mt-4">
+                    <pre class="bg-light p-3 rounded"
+                        style="font-size: 0.8rem; overflow-x: auto;"><code><%= error.stack %></code></pre>
+                </div>
+                <% } %>
+
+                    <div class="mt-4">
+                        <a href="/" class="btn btn-primary px-4">Kembali ke Dashboard</a>
+                    </div>
+        </div>
+    </div>
+</div>

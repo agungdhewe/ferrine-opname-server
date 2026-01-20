@@ -28,3 +28,33 @@ Aturan:
 - Tunggu konfirmasi saya sebelum melakukan tindakan pengembangan fitur.
 - Jawab 'SIAP' jika kamu sudah paham.
 
+
+
+# 4
+ok, generate project ini
+
+
+RESULT:
+* project selesai dibuat
+* bisa dijalankan dengan npm run start
+* berhasil diakses di http://localhost:3000
+* saat login muncul error:
+Error: data and hash arguments required
+    at Object.compare (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/bcrypt/bcrypt.js:208:17)
+    at /Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/bcrypt/promises.js:29:12
+    at new Promise (<anonymous>)
+    at module.exports.promise (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/bcrypt/promises.js:20:12)
+    at Object.compare (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/bcrypt/bcrypt.js:204:25)
+    at Module.login (file:///Volumes/Development/agungdhewe/ferrine-opname-server/src/services/authService.js:35:38)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async login (file:///Volumes/Development/agungdhewe/ferrine-opname-server/src/controllers/authController.js:19:24)
+
+
+# 5
+
+saat saya coba running dan login:
+(paste error message)
+
+tolong perbaiki
+
+
