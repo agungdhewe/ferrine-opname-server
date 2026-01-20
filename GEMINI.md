@@ -266,6 +266,18 @@ DbContract:
     - menampilkan daftar result untuk project yang dipilih
     - menampilkan, menambah, menghapus daftar user untuk project yang dipilih
     - list project bisa difilter berdasarkan brandCode, siteCode, workingType, dateStart, dateEnd
+    - user bisa upload item file csv dari DetailItem project, dan memilih delimiter CSV (tab, comma, semicolon, pipe) (default: comma) 
+    - format file CSV adalah sebagai berikut (mirip pada upload item, namun tanpa brandCode:
+      - barcode,itemId,article,material,color,size,name,description,category,price,sellPrice,discount,isSpecialPrice,stockQty,printQty,pricingId
+    - saat upload, sistem otomatis memasukkan data ke tabel item dan barcode, dengan brandCode sesuai project yang dipilih
+    - contoh data:
+
+      | barcode | itemId | article | material | color | size | name | description | category | price | sellPrice | discount | isSpecialPrice | stockQty | printQty | pricingId |
+      | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+      | 8991234000001 | FORM-COT-WHT-S | FORM01 | COTTON | WHITE | S | Kemeja Formal Slim Fit | Bahan katun stretch | Baju Formal | 250000 | 250000 | 0 | false | 50 | 0 | PRC01 |
+      | 8991234000002 | FORM-COT-WHT-S | FORM01 | COTTON | WHITE | S | Kemeja Formal Slim Fit | Bahan katun stretch | Baju Formal | 250000 | 225000 | 0 | true | 10 | 0 | PRC01 |
+
+    - buat juga fitur pencarian di project detail dan project result seperti pada item   
     - tampilkan dalam tab dan paging yang rapi
     - pada project result, bisa filter text 
 - Summary Project

@@ -1,0 +1,120 @@
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="/projects">Projects</a></li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <%= targetProject && targetProject.projectId ? 'Edit' : 'Tambah' %> Project
+                </li>
+            </ol>
+        </nav>
+        <h1 class="fw-bold h3">
+            <%= title %>
+        </h1>
+    </div>
+</div>
+
+<% if (typeof error !=='undefined' ) { %>
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <strong>Error:</strong>
+        <%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form
+                    action="/projects/<%= targetProject && targetProject.projectId ? targetProject.projectId + '/edit' : 'create' %>"
+                    method="POST">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="projectCode"
+                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Project
+                                Code</label>
+                            <input type="text" class="form-control" id="projectCode" name="projectCode" required
+                                placeholder="Contoh: OP-JKT-24"
+                                value="<%= targetProject ? targetProject.projectCode : '' %>">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="siteCode"
+                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Site
+                                Code</label>
+                            <input type="text" class="form-control" id="siteCode" name="siteCode" required
+                                placeholder="JKT01" value="<%= targetProject ? targetProject.siteCode : '' %>">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="brandCode"
+                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Brand
+                                Code</label>
+                            <input type="text" class="form-control" id="brandCode" name="brandCode" required
+                                placeholder="FERRINE" value="<%= targetProject ? targetProject.brandCode : '' %>">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="dateStart"
+                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Tanggal
+                                Mulai</label>
+                            <input type="date" class="form-control" id="dateStart" name="dateStart" required
+                                value="<%= targetProject && targetProject.dateStart ? new Date(targetProject.dateStart).toISOString().split('T')[0] : '' %>">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="dateEnd"
+                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Tanggal
+                                Selesai</label>
+                            <input type="date" class="form-control" id="dateEnd" name="dateEnd" required
+                                value="<%= targetProject && targetProject.dateEnd ? new Date(targetProject.dateEnd).toISOString().split('T')[0] : '' %>">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label for="workingType"
+                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Working
+                                Type</label>
+                            <select class="form-select" id="workingType" name="workingType" required>
+                                <option value="OPNAME" <%=targetProject && targetProject.workingType==='OPNAME'
+                                    ? 'selected' : '' %>>OPNAME</option>
+                                <option value="RECEIVING" <%=targetProject && targetProject.workingType==='RECEIVING'
+                                    ? 'selected' : '' %>>RECEIVING</option>
+                                <option value="TRANSFER" <%=targetProject && targetProject.workingType==='TRANSFER'
+                                    ? 'selected' : '' %>>TRANSFER</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="description"
+                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Deskripsi
+                                Project</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"
+                                placeholder="Tambahkan catatan khusus..."><%= targetProject ? targetProject.description : '' %></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="disabled" name="disabled"
+                                    <%=targetProject && targetProject.disabled ? 'checked' : '' %>>
+                                <label class="form-check-label" for="disabled">Nonaktifkan Project</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 pt-3 border-top mt-4 d-flex justify-content-between">
+                            <div>
+                                <% if (targetProject && targetProject.projectId) { %>
+                                    <form action="/projects/<%= targetProject.projectId %>/delete" method="POST"
+                                        onsubmit="return confirm('Apakah Anda yakin ingin menghapus project ini?')"
+                                        class="d-inline">
+                                        <button type="submit" class="btn btn-outline-danger">Hapus Project</button>
+                                    </form>
+                                    <% } %>
+                            </div>
+                            <div>
+                                <a href="/projects" class="btn btn-light me-2">Batal</a>
+                                <button type="submit" class="btn btn-primary px-4">Simpan Project</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>

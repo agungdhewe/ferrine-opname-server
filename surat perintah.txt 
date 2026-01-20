@@ -197,3 +197,128 @@ ok, sudah berjalan seperti seharusnya.
 lanjutkan dengan membuat service untuk Manajemen Project
 
 
+
+**** saat running, error:
+npm run start
+
+> ferrine-opname-server@1.0.0 start
+> node src/server.js
+
+node:internal/modules/esm/resolve:274
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Volumes/Development/agungdhewe/ferrine-opname-server/src/middleware/authMiddleware.js' imported from /Volumes/Development/agungdhewe/ferrine-opname-server/src/routes/projectRoutes.js
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:859:10)
+    at defaultResolve (node:internal/modules/esm/resolve:983:11)
+    at ModuleLoader.defaultResolve (node:internal/modules/esm/loader:801:12)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:725:25)
+    at ModuleLoader.resolve (node:internal/modules/esm/loader:708:38)
+    at ModuleLoader.getModuleJobForImport (node:internal/modules/esm/loader:309:38)
+    at #link (node:internal/modules/esm/module_job:208:49) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///Volumes/Development/agungdhewe/ferrine-opname-server/src/middleware/authMiddleware.js'
+}
+
+
+
+# 17 
+cek error
+
+
+
+# 18
+ada perubahan pada GEMINI.md, cek di Fitur > Project
+- Jangan membuat file, direktori, atau kode apa pun sekarang.
+- Berikan ringkasan singkat (bullet points) perubahan yang terjadi.
+- Tunggu konfirmasi saya sebelum melakukan tindakan pengembangan fitur.
+- Jawab 'SIAP' jika kamu sudah paham.
+
+
+# 19
+modifikasi management project
+
+
+ada error:
+SyntaxError: Unexpected token ')' in /Volumes/Development/agungdhewe/ferrine-opname-server/src/views/projects/view.ejs while compiling ejs
+
+If the above error is not helpful, you may want to try EJS-Lint:
+https://github.com/RyanZim/EJS-Lint
+Or, if you meant to create an async function, pass `async: true` as an option.
+    at new Function (<anonymous>)
+    at Template.compile (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/ejs/lib/ejs.js:673:12)
+    at Object.compile (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/ejs/lib/ejs.js:398:16)
+    at handleCache (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/ejs/lib/ejs.js:235:18)
+    at tryHandleCache (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/ejs/lib/ejs.js:274:16)
+    at exports.renderFile [as engine] (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/ejs/lib/ejs.js:491:10)
+    at View.render (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/express/lib/view.js:135:8)
+    at tryRender (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/express/lib/application.js:657:10)
+    at app.render (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/express/lib/application.js:609:3)
+    at ServerResponse.render (/Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/express/lib/response.js:1049:7)
+
+
+# 20
+cek error
+
+
+# 21
+error saat upload file csv
+
+URL: http://localhost:3000
+Project Bulk Import Error: error: null value in column "itemId" of relation "item" violates not-null constraint
+    at /Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/pg/lib/client.js:588:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Module.bulkImportProjectItems (file:///Volumes/Development/agungdhewe/ferrine-opname-server/src/services/projectService.js:329:13)
+    at async CsvParser.<anonymous> (file:///Volumes/Development/agungdhewe/ferrine-opname-server/src/controllers/projectController.js:207:17) {
+  length: 324,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (null, FRN, , , , , null, f, , , admin, 2026-01-20 08:12:18.647521, admin, 2026-01-20 08:12:18.647521, f, 0.00, 0.00, 0.00, f, 0, 0, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'item',
+  column: 'itemId',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2005',
+  routine: 'ExecConstraints'
+}
+error: null value in column "itemId" of relation "item" violates not-null constraint
+    at /Volumes/Development/agungdhewe/ferrine-opname-server/node_modules/pg/lib/client.js:588:17
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async Module.bulkImportProjectItems (file:///Volumes/Development/agungdhewe/ferrine-opname-server/src/services/projectService.js:329:13)
+    at async CsvParser.<anonymous> (file:///Volumes/Development/agungdhewe/ferrine-opname-server/src/controllers/projectController.js:207:17) {
+  length: 324,
+  severity: 'ERROR',
+  code: '23502',
+  detail: 'Failing row contains (null, FRN, , , , , null, f, , , admin, 2026-01-20 08:12:18.647521, admin, 2026-01-20 08:12:18.647521, f, 0.00, 0.00, 0.00, f, 0, 0, null).',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'item',
+  column: 'itemId',
+  dataType: undefined,
+  constraint: undefined,
+  file: 'execMain.c',
+  line: '2005',
+  routine: 'ExecConstraints'
+}
+
+
+
+#22
+ok sudah sesuai
+buat service management device.
+tambahkan ke menu
+
+
+#23

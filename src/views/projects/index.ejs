@@ -1,0 +1,117 @@
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h1 class="fw-bold h3 mb-0">Manajemen Project</h1>
+        <p class="text-secondary mb-0">Kelola jadwal dan progres Stock Opname.</p>
+    </div>
+    <div class="col-auto">
+        <a href="/projects/create" class="btn btn-primary d-flex align-items-center">
+            <span class="me-2">+</span> Buat Project
+        </a>
+    </div>
+</div>
+
+<div class="card p-3 mb-4 bg-light border-0">
+    <form action="/projects" method="GET" class="row g-3">
+        <div class="col-md-2">
+            <input type="text" name="siteCode" class="form-control" placeholder="Site Code"
+                value="<%= filters.siteCode || '' %>">
+        </div>
+        <div class="col-md-2">
+            <input type="text" name="brandCode" class="form-control" placeholder="Brand Code"
+                value="<%= filters.brandCode || '' %>">
+        </div>
+        <div class="col-md-2">
+            <select name="workingType" class="form-control">
+                <option value="">-- Tipe Kerja --</option>
+                <option value="OPNAME" <%=filters.workingType==='OPNAME' ? 'selected' : '' %>>OPNAME</option>
+                <option value="RECEIVING" <%=filters.workingType==='RECEIVING' ? 'selected' : '' %>>RECEIVING</option>
+                <option value="TRANSFER" <%=filters.workingType==='TRANSFER' ? 'selected' : '' %>>TRANSFER</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="dateStart" class="form-control" value="<%= filters.dateStart || '' %>">
+        </div>
+        <div class="col-md-2">
+            <input type="date" name="dateEnd" class="form-control" value="<%= filters.dateEnd || '' %>">
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+        <% if (filters.siteCode || filters.brandCode || filters.workingType || filters.dateStart || filters.dateEnd) {
+            %>
+            <div class="col-md-1">
+                <a href="/projects" class="btn btn-link text-secondary">Reset</a>
+            </div>
+            <% } %>
+    </form>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-4">Project Code</th>
+                    <th>Site</th>
+                    <th>Brand</th>
+                    <th>Rentang Waktu</th>
+                    <th>Tipe</th>
+                    <th>Status</th>
+                    <th class="text-end pe-4">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (projects.length===0) { %>
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">Belum ada project yang terdaftar.</td>
+                    </tr>
+                    <% } %>
+                        <% projects.forEach(p=> { %>
+                            <tr>
+                                <td class="ps-4 fw-bold">
+                                    <a href="/projects/<%= p.projectId %>" class="text-decoration-none text-dark">
+                                        <%= p.projectCode %>
+                                    </a>
+                                </td>
+                                <td><span class="badge bg-secondary-subtle text-secondary">
+                                        <%= p.siteCode %>
+                                    </span></td>
+                                <td><span class="badge bg-info-subtle text-info">
+                                        <%= p.brandCode %>
+                                    </span></td>
+                                <td class="small">
+                                    <%= new Date(p.dateStart).toLocaleDateString('id-ID') %> - <%= new
+                                            Date(p.dateEnd).toLocaleDateString('id-ID') %>
+                                </td>
+                                <td><span class="small fw-medium text-uppercase text-secondary">
+                                        <%= p.workingType %>
+                                    </span></td>
+                                <td>
+                                    <% if (p.disabled) { %>
+                                        <span class="badge bg-danger-subtle text-danger">Nonaktif</span>
+                                        <% } else { %>
+                                            <% const now=new Date(); if (now> new Date(p.dateEnd)) { %>
+                                                <span class="badge bg-secondary-subtle text-secondary">Selesai</span>
+                                                <% } else if (now < new Date(p.dateStart)) { %>
+                                                    <span class="badge bg-warning-subtle text-warning">Akan
+                                                        Datang</span>
+                                                    <% } else { %>
+                                                        <span
+                                                            class="badge bg-success-subtle text-success">Berjalan</span>
+                                                        <% } %>
+                                                            <% } %>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a href="/projects/<%= p.projectId %>"
+                                            class="btn btn-sm btn-outline-info">View</a>
+                                        <a href="/projects/<%= p.projectId %>/edit"
+                                            class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>

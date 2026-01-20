@@ -1,0 +1,419 @@
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="/projects">Projects</a></li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    <%= project.projectCode %>
+                </li>
+            </ol>
+        </nav>
+        <div class="d-flex align-items-center">
+            <h1 class="fw-bold h3 mb-0 me-3">
+                <%= project.projectCode %>
+            </h1>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                <%= project.workingType %>
+            </span>
+        </div>
+        <p class="text-secondary mb-0">
+            <%= project.description || 'Tidak ada deskripsi.' %>
+        </p>
+    </div>
+    <div class="col-auto">
+        <a href="/projects/<%= project.projectId %>/edit" class="btn btn-outline-secondary btn-sm">Edit Project</a>
+    </div>
+</div>
+
+<!-- Tabs Navigation -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link <%= activeTab === 'details' ? 'active fw-bold' : '' %>"
+            href="/projects/<%= project.projectId %>?tab=details">Detail Item</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <%= activeTab === 'results' ? 'active fw-bold' : '' %>"
+            href="/projects/<%= project.projectId %>?tab=results">Hasil Scan (History)</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <%= activeTab === 'users' ? 'active fw-bold' : '' %>"
+            href="/projects/<%= project.projectId %>?tab=users">User & Device</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link <%= activeTab === 'summary' ? 'active fw-bold' : '' %>"
+            href="/projects/<%= project.projectId %>?tab=summary">Ringkasan (Summary)</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <!-- 1. TAB DETAILS -->
+    <% if (activeTab==='details' ) { %>
+        <div class="row g-3 mb-4">
+            <div class="col-md-8">
+                <div class="card p-3 bg-light border-0">
+                    <form action="/projects/<%= project.projectId %>" method="GET" class="row g-2">
+                        <input type="hidden" name="tab" value="details">
+                        <div class="col">
+                            <input type="text" name="search" class="form-control"
+                                placeholder="Cari Barcode, Item ID, Nama, atau Article..."
+                                value="<%= filters.search || '' %>">
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Cari</button>
+                            <% if (filters.search) { %>
+                                <a href="/projects/<%= project.projectId %>?tab=details"
+                                    class="btn btn-link text-secondary">Reset</a>
+                                <% } %>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-4 text-end">
+                <button type="button" class="btn btn-outline-success h-100 px-4" data-bs-toggle="modal"
+                    data-bs-target="#uploadModal">
+                    <i class="me-1">↑</i> Upload CSV Item
+                </button>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Barcode</th>
+                            <th>Item ID / Article</th>
+                            <th>Nama Barang</th>
+                            <th class="text-center">Stock Sistem</th>
+                            <th class="text-center">Qty Cetak</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (items.length===0) { %>
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">Data detail project belum ada.</td>
+                            </tr>
+                            <% } %>
+                                <% items.forEach(function(i) { %>
+                                    <tr>
+                                        <td class="ps-4 fw-bold font-monospace">
+                                            <%= i.barcode %>
+                                        </td>
+                                        <td>
+                                            <div class="fw-medium text-dark">
+                                                <%= i.itemId %>
+                                            </div>
+                                            <div class="small text-secondary">
+                                                <%= i.article %>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <%= i.name %>
+                                        </td>
+                                        <td class="text-center">
+                                            <%= i.stockQty %>
+                                        </td>
+                                        <td class="text-center">
+                                            <%= i.printQty %>
+                                        </td>
+                                    </tr>
+                                    <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Upload Modal -->
+        <div class="modal fade" id="uploadModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content border-0 shadow-lg">
+                    <form action="/projects/<%= project.projectId %>/upload" method="POST"
+                        enctype="multipart/form-data">
+                        <div class="modal-header bg-success text-white">
+                            <h5 class="modal-title">Upload Item Proyek</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="alert alert-info small mb-4">
+                                <strong>Info:</strong> Upload ini otomatis menggunakan Brand Code dari Proyek (<strong>
+                                    <%= project.brandCode %>
+                                </strong>).
+                                Jangan sertakan kolom brandCode dalam file CSV Anda.
+                                <a href="/projects/template" class="d-block mt-2 text-decoration-none fw-bold">Download
+                                    Template Project CSV</a>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label small text-uppercase text-secondary fw-bold">Pilih File
+                                    CSV</label>
+                                <input type="file" name="csvFile" class="form-control" required accept=".csv">
+                            </div>
+
+                            <div class="mb-0">
+                                <label class="form-label small text-uppercase text-secondary fw-bold">Pilihan
+                                    Delimiter</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="delimiter" value="comma"
+                                            id="d_comma" checked>
+                                        <label class="form-check-label" for="d_comma">Comma (,)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="delimiter" value="semicolon"
+                                            id="d_semi">
+                                        <label class="form-check-label" for="d_semi">Semicolon (;)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="delimiter" value="pipe"
+                                            id="d_pipe">
+                                        <label class="form-check-label" for="d_pipe">Pipe (|)</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="delimiter" value="tab"
+                                            id="d_tab">
+                                        <label class="form-check-label" for="d_tab">Tab</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-success px-4">Mulai Import</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <% } %>
+
+            <!-- 2. TAB RESULTS -->
+            <% if (activeTab==='results' ) { %>
+                <div class="card p-3 mb-4 bg-light border-0">
+                    <form action="/projects/<%= project.projectId %>" method="GET" class="row g-2">
+                        <input type="hidden" name="tab" value="results">
+                        <div class="col-md-6">
+                            <input type="text" name="search" class="form-control"
+                                placeholder="Cari Barcode, Item ID, Nama, Article, atau User..."
+                                value="<%= filters.search || '' %>">
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Cari</button>
+                            <% if (filters.search) { %>
+                                <a href="/projects/<%= project.projectId %>?tab=results"
+                                    class="btn btn-link text-secondary">Reset</a>
+                                <% } %>
+                        </div>
+                    </form>
+                </div>
+                <div class="card border-0 shadow-sm">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4">Waktu Scan</th>
+                                    <th>User</th>
+                                    <th>Barcode</th>
+                                    <th>Item ID / Article</th>
+                                    <th>Nama Barang</th>
+                                    <th class="text-center">Qty Scan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (results.length===0) { %>
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">Belum ada hasil scan.</td>
+                                    </tr>
+                                    <% } %>
+                                        <% results.forEach(function(r) { %>
+                                            <tr>
+                                                <td class="ps-4 small text-secondary">
+                                                    <%= new Date(r.timestamp).toLocaleString('id-ID') %>
+                                                </td>
+                                                <td><span class="badge bg-light text-dark fw-normal">
+                                                        <%= r.username %>
+                                                    </span></td>
+                                                <td class="fw-bold font-monospace text-primary">
+                                                    <%= r.barcode %>
+                                                </td>
+                                                <td>
+                                                    <div class="small fw-bold">
+                                                        <%= r.itemId %>
+                                                    </div>
+                                                    <div class="extra-small text-muted">
+                                                        <%= r.article %>
+                                                    </div>
+                                                </td>
+                                                <td class="small">
+                                                    <%= r.name %>
+                                                </td>
+                                                <td class="text-center"><span class="fw-bold text-dark">
+                                                        <%= r.scannedQty %>
+                                                    </span></td>
+                                            </tr>
+                                            <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <% } %>
+
+                    <!-- 3. TAB USERS -->
+                    <% if (activeTab==='users' ) { %>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-white fw-bold">Tambah Akses User</div>
+                                    <div class="card-body">
+                                        <form action="/projects/<%= project.projectId %>/users/assign" method="POST">
+                                            <div class="mb-3">
+                                                <label class="form-label small text-uppercase text-secondary">Pilih
+                                                    User</label>
+                                                <select name="username" class="form-select" required>
+                                                    <% allUsers.forEach(function(u) { if (!u.disabled) { %>
+                                                        <option value="<%= u.username %>">
+                                                            <%= u.fullname %> (<%= u.username %>)
+                                                        </option>
+                                                        <% } }); %>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label small text-uppercase text-secondary">Pilih
+                                                    Device</label>
+                                                <select name="deviceId" class="form-select" required>
+                                                    <% allDevices.forEach(function(d) { if (!d.disabled) { %>
+                                                        <option value="<%= d.deviceId %>">
+                                                            <%= d.name %>
+                                                        </option>
+                                                        <% } }); %>
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary w-100">Tambah ke
+                                                Project</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0 align-middle">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th class="ps-4">User</th>
+                                                    <th>Device</th>
+                                                    <th>Last Sync</th>
+                                                    <th class="text-end pe-4">Aksi</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% if (users.length===0) { %>
+                                                    <tr>
+                                                        <td colspan="4" class="text-center py-4 text-muted">Belum ada
+                                                            user yang ditugaskan.</td>
+                                                    </tr>
+                                                    <% } %>
+                                                        <% users.forEach(function(u) { %>
+                                                            <tr>
+                                                                <td class="ps-4">
+                                                                    <div class="fw-bold">
+                                                                        <%= u.fullname %>
+                                                                    </div>
+                                                                    <div class="small text-secondary">@<%= u.username %>
+                                                                    </div>
+                                                                </td>
+                                                                <td><span class="badge bg-light text-dark fw-normal">
+                                                                        <%= u.deviceName %>
+                                                                    </span></td>
+                                                                <td class="small text-secondary">
+                                                                    <%= u.lastSync ? new
+                                                                        Date(u.lastSync).toLocaleString('id-ID')
+                                                                        : 'Belum pernah' %>
+                                                                </td>
+                                                                <td class="text-end pe-4">
+                                                                    <form
+                                                                        action="/projects/<%= project.projectId %>/users/remove"
+                                                                        method="POST" class="d-inline">
+                                                                        <input type="hidden" name="username"
+                                                                            value="<%= u.username %>">
+                                                                        <input type="hidden" name="deviceId"
+                                                                            value="<%= u.deviceId %>">
+                                                                        <button type="submit"
+                                                                            class="btn btn-sm btn-outline-danger"
+                                                                            onclick="return confirm('Hapus akses user ini?')">Hapus</button>
+                                                                    </form>
+                                                                </td>
+                                                            </tr>
+                                                            <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+
+                            <!-- 4. TAB SUMMARY -->
+                            <% if (activeTab==='summary' ) { %>
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold">Ringkasan Perolehan Stok</span>
+                                        <form action="/projects/<%= project.projectId %>/summary/download" method="GET"
+                                            class="d-flex gap-2">
+                                            <select name="delimiter" class="form-select form-select-sm"
+                                                style="width: auto;">
+                                                <option value=",">Comma (,)</option>
+                                                <option value=";">Semicolon (;)</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-success">Download CSV</button>
+                                        </form>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table mb-0 align-middle">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <th class="ps-4">Item ID / Article</th>
+                                                    <th>Nama Barang</th>
+                                                    <th class="text-center">Stok Sistem</th>
+                                                    <th class="text-center">Hasil Scan</th>
+                                                    <th class="text-center">Selisih</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% if (summary.length===0) { %>
+                                                    <tr>
+                                                        <td colspan="5" class="text-center py-4 text-muted">Belum ada
+                                                            ringkasan data.</td>
+                                                    </tr>
+                                                    <% } %>
+                                                        <% summary.forEach(function(s) { %>
+                                                            <% const diff=s.totalScanned - s.expectedQty; %>
+                                                                <tr>
+                                                                    <td class="ps-4">
+                                                                        <div class="fw-bold">
+                                                                            <%= s.itemId %>
+                                                                        </div>
+                                                                        <div class="small text-secondary">
+                                                                            <%= s.article %>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <%= s.name %>
+                                                                    </td>
+                                                                    <td class="text-center">
+                                                                        <%= s.expectedQty %>
+                                                                    </td>
+                                                                    <td class="text-center fw-bold text-primary">
+                                                                        <%= s.totalScanned %>
+                                                                    </td>
+                                                                    <td
+                                                                        class="text-center fw-bold <%= diff < 0 ? 'text-danger' : (diff > 0 ? 'text-success' : 'text-secondary') %>">
+                                                                        <%= diff> 0 ? '+' : '' %><%= diff %>
+                                                                    </td>
+                                                                </tr>
+                                                                <% }); %>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <% } %>
+</div>
