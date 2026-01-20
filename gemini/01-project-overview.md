@@ -1,6 +1,6 @@
-## Project Overview
-- Web based Application
-- Backend: Node.js (Express)
-- Use case: Stock Opname multi-device multi-store
-- Support horizontal scaling
-
+## 🏗️ Project Overview & Architecture
+- **Type:** Web-based Enterprise Stock Opname
+- **Backend:** Node.js (Express.js) - Full ES6 Modules (`import/export`)
+- **Database:** PostgreSQL 16 (Relational Integrity)
+- **Cache/Session:** Redis (Speed & Token Blacklisting)
+- **Scale:** Dirancang untuk horizontal scaling

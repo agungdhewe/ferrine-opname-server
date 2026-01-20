@@ -49,6 +49,182 @@ Dokumen ini adalah panduan konteks bagi asisten AI (Gemini) untuk memahami atura
 - **Input harga:** Inputmask
 - **Notifikasi:** SweetAlert2
 - **Interaksi tanpa reload:** HTMX (opsional)
+
+
+---
+## Global Data Rules
+- Semua data harus dapat diaudit siapa creator dan yang terakhir update
+- semua perubahan data harus di log
+- tidak ada hard delete untuk:
+  - ProjectHeader
+  - ProjectResult
+  - ProjectDetail
+
+
+---
+## Data Model
+
+Dokumen ini mendefinisikan **logical data model** dan **aturan (rules)**  
+sebagai kontrak antara **Android App**, **Backend API**, dan **Database**.
+
+### Device
+
+- deviceId : INT        [PK]
+- name     : TEXT
+- disabled : BOOL
+```text
+Rules:
+- Device dapat dinonaktifkan tanpa dihapus
+```
+
+
+---
+### User
+- username (TEXT) [PK]
+- fullname (TEXT)
+- password (TEXT) [HASHED]
+- isAdmin (BOOL)
+- allowOpname (BOOL)
+- allowReceiving (BOOL)
+- allowTransfer (BOOL)
+- allowPrintLabel (BOOL)
+- disabled (BOOL)
+
+```text
+Rules:
+- password harus hashed
+```
+---
+### UserDevice
+- username (TEXT) [FK -> User.username]
+- deviceId (INT) [FK -> Device.deviceId]
+``` text
+Rules:
+- satu user bisa mengakses banyak device
+- kombinasi (username, deviceId) unik
+```
+
+---
+### Item
+- itemId (TEXT) [PK]
+- article (TEXT)
+- material (TEXT)
+- color (TEXT)
+- size (TEXT)
+- name (TEXT)
+- description (TEXT)
+- category (TEXT)
+
+```text
+Rules:
+- itemId immutable
+```
+---
+### Barcode
+- itemId (TEXT) [FK -> Item.itemId]
+- barcode (TEXT)
+```text
+Rules:
+- barcode unik
+- barcode tidak boleh diubah
+- satu item bisa punya banyak barcode
+```
+---
+### ProjectHeader
+- projectId (TEXT) [PK]
+- dateStart (DATE)
+- dateEnd (DATE)
+- description (TEXT)
+- workingType (TEXT)
+- disabled (BOOL)
+- siteCode (TEXT)
+- brandCode (TEXT)
+```text
+Rules:
+- satu project aktif per site + brand
+- project disabled = true → semua transaksi ditolak
+- projectId immutable
+```
+---
+### ProjectDetail
+- projectId (TEXT) [FK -> ProjectHeader.projectId]
+- itemId (TEXT) [FK -> Item.itemId]
+- price (DECIMAL)
+- sellPrice (DECIMAL)
+- discount (DECIMAL)
+- isSpecialPrice (BOOL)
+- stockQty (INT)
+- printQty (INT)
+- pricingId (TEXT)
+```text
+- kombinasi (projectId, itemId) unik
+- printQty hanya untuk label
+- stockQty digunakan untuk opname, receiving, transfer
+pricingId referensi pricing aktif
+```
+
+---
+### ProjectResult
+- projectId (TEXT) [FK -> ProjectHeader.projectId]
+- itemId (TEXT) [FK -> Item.itemId]
+- deviceId (INT) [FK -> Device.deviceId]
+- timestamp (TIMESTAMP)
+- barcode (TEXT)
+- scannedQty (INT)
+```text
+Rules:
+- kombinasi (projectId, itemId, deviceId, barcode) unik
+- scannedQty tidak boleh diubah
+- barcode tidak boleh diubah
+- deviceId tidak boleh diubah
+- projectId tidak boleh diubah
+- itemId tidak boleh diubah
+```
+---
+## Relasi Data
+- User 1---N UserDevice N---1 Device
+- Item 1---N Barcode
+- ProjectHeader 1---N ProjectDetail
+- ProjectHeader 1---N ProjectResult
+---
+## Data Contract Rules
+
+### DbContract
+`DbContract` adalah satu-satunya sumber kebenaran (Single Source of Truth)
+untuk:
+- Nama tabel database
+- Nama kolom database
+- Alias resmi yang digunakan di query
+
+### Mandatory Rules
+- DR1: Semua query database MUST menggunakan nama tabel dan kolom dari `DbContract`
+- DR2: Hardcoded string untuk nama tabel atau kolom MUST NOT digunakan
+- DR3: Query yang tidak menggunakan `DbContract` dianggap invalid
+- DR4: Perubahan nama tabel atau kolom hanya boleh dilakukan di `DbContract`
+- DR5: Review code MUST menolak query yang melanggar aturan ini
+### DbContract Structure (Conceptual)
+
+DbContract:
+- Device.TABLE
+- Device.Columns.deviceId
+- Device.Columns.name
+- Device.Columns.disabled
+
+- User.TABLE
+- User.Columns.username
+- User.Columns.fullname
+- User.Columns.password
+
+### Forbidden Patterns
+- Menuliskan nama tabel sebagai string literal di query
+- Menuliskan nama kolom langsung di SQL string
+- Menyusun SQL dengan nama field manual
+
+### Enforcement
+- Semua query harus melalui layer repository / DAO
+- Code review wajib memverifikasi penggunaan DbContract
+- Static analysis / lint rule direkomendasikan
+
 ---
 ## Instruksi Khusus untuk AI
 1. Jika saya meminta fitur baru, selalu prioritaskan aspek **keamanan** dan **integritas data**.

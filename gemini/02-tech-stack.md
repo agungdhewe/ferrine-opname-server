@@ -1,10 +1,5 @@
-## Tech Stack Utama
-- **Runtime:** Node.js (Full ES6 Modules - `import/export`)
-- **Framework:** Express.js
-- **Template Engine:** EJS
-- **Client Framework:** Bootstrap 5
-- **Database:** PostgreSQL 16
-- **Cache & Session:** Redis
-- **Auth:** JSON Web Token (JWT) & bcrypt untuk hashing password
-
-
+## 🛠️ Tech Stack & UI Standards
+- **Template Engine:** EJS (Server Side Rendering)
+- **Client Framework:** Bootstrap 5, HTMX (untuk interaksi parsial tanpa reload)
+- **Components:** DataTables (Grid), Select2 (Searchable Dropdown), SweetAlert2 (Notif), Inputmask (Currency/Qty)
+- **Auth:** JWT (Stateless) + bcrypt (Hashing)
