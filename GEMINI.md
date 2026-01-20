@@ -21,6 +21,7 @@ Dokumen ini adalah panduan konteks bagi asisten AI (Gemini) untuk memahami atura
 - **Error Handling:** Wajib menggunakan blok `try { ... } catch (error) { ... }` pada setiap fungsi.
 - **Data Credentials:** Untuk server side, dilarang keras menulis data sensitif di dalam kode. Gunakan `process.env` (file `.env`).
 - **Dokumentasi:** Gunakan komentar JSDoc dalam **Bahasa Indonesia**.
+- **Variabel:** Gunakan const untuk variabel yang tidak berubah dan let untuk variabel yang nilainya berubah; hindari penggunaan var.
 
 
 
@@ -39,10 +40,16 @@ Dokumen ini adalah panduan konteks bagi asisten AI (Gemini) untuk memahami atura
 3. **Token Revocation:** Gunakan Redis untuk menyimpan 'Blacklisted Tokens' saat user logout atau akun di-disable.
 4. **Credential Safety:** Dilarang hardcode kredensial. Gunakan `.env`.
 ---
-## Data Model
+## Logical Data Model
 
 Dokumen ini mendefinisikan **logical data model** dan **aturan (rules)**  
 sebagai kontrak antara **Opname Web App**, **Backend Service**, dan **Database**.
+
+*(Setiap tabel menyertakan audit fields: createdBy, createdAt, updatedBy, updatedAt, isDeleted)*
+
+*jika ada field disabled, berarti digunakan untuk menonaktifkan data, tanpa dihapus (tetap tampil di list)*
+
+*jika ada field isDeleted, berarti digunakan untuk menghapus data secara logis, tanpa dihapus fisik (tidak tampil di list)*
 
 format:
 EntityName (`table_name`)
@@ -54,11 +61,6 @@ EntityName (`table_name`)
 - name : TEXT [UNIQUE]
 - secret : TEXT
 - disabled : BOOL
-- createBy : TEXT
-- createdAt : TIMESTAMP
-- updateBy : TEXT
-- updatedAt : TIMESTAMP
-
 
 ### User (`user`)
 - username (TEXT) [PK]
@@ -70,14 +72,11 @@ EntityName (`table_name`)
 - allowTransfer (BOOL)
 - allowPrintLabel (BOOL)
 - disabled (BOOL)
-- createBy : TEXT
-- createdAt : TIMESTAMP
-- updateBy : TEXT
-- updatedAt : TIMESTAMP
 
 
 ### Item (`item`)
 - itemId (TEXT) [PK]
+- brandCode (TEXT)
 - article (TEXT)
 - material (TEXT)
 - color (TEXT)
@@ -86,41 +85,37 @@ EntityName (`table_name`)
 - disabled (BOOL)
 - description (TEXT)
 - category (TEXT)
-- createBy : TEXT
-- createdAt : TIMESTAMP
-- updateBy : TEXT
-- updatedAt : TIMESTAMP
 
 
 ### Barcode (`barcode`)
+- barcodeId (SERIAL) [PK]
 - itemId (TEXT) [FK -> Item.itemId]
-- barcode (TEXT)
+- barcode (TEXT) 
+- brandCode (TEXT)
+- [Constraint]: Unique(barcode, brandCode)
 
 
 ### ProjectHeader (`project`)
-- projectId (TEXT) [PK]
+- projectId (SERIAL) [PK]
+- projectCode (TEXT) [UNIQUE]
 - dateStart (DATE)
 - dateEnd (DATE)
 - description (TEXT)
 - workingType (TEXT)
 - disabled (BOOL)
-- isDeleted (BOOL)
 - siteCode (TEXT)
 - brandCode (TEXT)
-- createBy : TEXT
-- createdAt : TIMESTAMP
-- updateBy : TEXT
-- updatedAt : TIMESTAMP
 
 ### ProjectUser (`project_user`)
-- projectId (TEXT) [FK -> ProjectHeader.projectId]
+- projectId (SERIAL) [FK -> ProjectHeader.projectId]
 - username (TEXT) [FK -> User.username]
 - deviceId (INT) [FK -> Device.deviceId]
 - lastSync (TIMESTAMP)
 
 ### ProjectDetail (`project_detil`)
-- projectId (TEXT) [FK -> ProjectHeader.projectId]
+- projectId (SERIAL) [FK -> ProjectHeader.projectId]
 - itemId (TEXT) [FK -> Item.itemId]
+- barcode (TEXT)
 - price (DECIMAL)
 - sellPrice (DECIMAL)
 - discount (DECIMAL)
@@ -132,13 +127,14 @@ EntityName (`table_name`)
 
 
 ### ProjectResult (`project_result`)
-- projectId (TEXT) [FK -> ProjectHeader.projectId]
+- projectId (SERIAL) [FK -> ProjectHeader.projectId]
 - itemId (TEXT) [FK -> Item.itemId]
+- barcode (TEXT)
 - deviceId (INT) [FK -> Device.deviceId]
 - username (TEXT) [FK -> User.username]
 - timestamp (TIMESTAMP)
-- barcode (TEXT)
 - scannedQty (INT)
+- [Constraint]: Unique(projectId, deviceId, timestamp) -> Untuk keperluan UPSERT
 
 ---
 ## Relasi Data
@@ -158,6 +154,7 @@ EntityName (`table_name`)
   - satu user bisa memiliki banyak device.
 - **Item & Barcode:** 
 `itemId` [PK] bersifat Immutable. Satu Item bisa memiliki banyak Barcode (1-N).
+`itemId` berbeda dengan `barcode`, karena `barcode` adalah id external dan `itemId` adalah id internal.
 - **Project:**
   - **ProjectHeader:**
     - satu `projectHeader` bisa memiliki banyak `projectDetail`.
@@ -172,7 +169,10 @@ EntityName (`table_name`)
   - **ProjectDetail:**
     - kombinasi `projectId`, `barcode` harus unik.
   - **ProjectResult:** (Transaction Table) 
+    - project result berfungsi sebagai history scan.
+    - project result adalah streaming data dari mobile device, dimana saat project berlangsung user bisa scan barcode yang sama berkali-kali.
     - kombinasi `projectId`, `deviceId`, `timestamp` harus unik.
+    - `timestamp` harus unik di dalam satu `projectId` dan `deviceId` untuk keperluan konsistensi data saat syncronisasi data (syncronisasi data tidak boleh ada duplikasi) (karena ada kemungkinan try again).
     - Gunakan `UPSERT` logic (Update if exist, Insert if new) untuk `scannedQty`.
     - `projectResult` bersifat read-only, dan tidak boleh dimodifikasi user.
 
@@ -186,6 +186,7 @@ EntityName (`table_name`)
 `DbContract` adalah satu-satunya sumber kebenaran (Single Source of Truth)
 untuk:
 - Nama tabel database
+- Jika nama tabel tidak mengirfomasikan schema, maka akan digunakan schema public
 - Nama kolom database
 - Alias resmi yang digunakan di query
 
@@ -230,10 +231,12 @@ DbContract:
   - Device
     - hanya admin yang akses program ini
   - Item
-    - hanya admin yang bisa create, update, delete
+    - hanya admin yang bisa create, update dan Soft Delete
     - menampilkan daftar barcode untuk item yang dipilih
     - bisa upload item dari file CSV
     - bisa memilih delimiter CSV (default: comma)
+    - bisa memilih brandCode saat list data item
+    - bisa filter berdasarkan text dan polihan kolom yang dipilih (article, name, category, description)
   - Project
     - menampilkan daftar detail untuk project yang dipilih
     - menampilkan daftar result untuk project yang dipilih

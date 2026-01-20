@@ -1,0 +1,9 @@
+#1
+
+Baca dan pahami file GEMINI.md di root direktori ini sebagai sumber kebenaran tunggal (Single Source of Truth) untuk proyek saya.
+
+Aturan:
+- Jangan membuat file, direktori, atau kode apa pun sekarang.
+- Berikan ringkasan singkat (bullet points) tentang arsitektur, aturan DbContract, dan skema database yang kamu pahami dari dokumen tersebut.
+- Tunggu konfirmasi saya sebelum melakukan tindakan pengembangan fitur.
+- Jawab 'SIAP' jika kamu sudah paham.

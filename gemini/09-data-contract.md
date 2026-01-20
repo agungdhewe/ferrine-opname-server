@@ -4,6 +4,7 @@
 `DbContract` adalah satu-satunya sumber kebenaran (Single Source of Truth)
 untuk:
 - Nama tabel database
+- Jika nama tabel tidak mengirfomasikan schema, maka akan digunakan schema public
 - Nama kolom database
 - Alias resmi yang digunakan di query
 

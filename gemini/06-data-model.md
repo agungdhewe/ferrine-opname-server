@@ -1,21 +1,26 @@
-## Data Model
+## Logical Data Model
 
 Dokumen ini mendefinisikan **logical data model** dan **aturan (rules)**  
-sebagai kontrak antara **Android App**, **Backend API**, dan **Database**.
+sebagai kontrak antara **Opname Web App**, **Backend Service**, dan **Database**.
 
-### Device
+*(Setiap tabel menyertakan audit fields: createdBy, createdAt, updatedBy, updatedAt, isDeleted)*
 
-- deviceId : INT        [PK]
-- name     : TEXT
+*jika ada field disabled, berarti digunakan untuk menonaktifkan data, tanpa dihapus (tetap tampil di list)*
+
+*jika ada field isDeleted, berarti digunakan untuk menghapus data secara logis, tanpa dihapus fisik (tidak tampil di list)*
+
+format:
+EntityName (`table_name`)
+- fieldName : DataType [PK/FK] [Description]
+
+
+### Device (`device`)
+- deviceId : INT [PK] AUTO_INCREMENT
+- name : TEXT [UNIQUE]
+- secret : TEXT
 - disabled : BOOL
-```text
-Rules:
-- Device dapat dinonaktifkan tanpa dihapus
-```
 
-
----
-### User
+### User (`user`)
 - username (TEXT) [PK]
 - fullname (TEXT)
 - password (TEXT) [HASHED]
@@ -26,48 +31,31 @@ Rules:
 - allowPrintLabel (BOOL)
 - disabled (BOOL)
 
-```text
-Rules:
-- password harus hashed
-```
----
-### UserDevice
-- username (TEXT) [FK -> User.username]
-- deviceId (INT) [FK -> Device.deviceId]
-``` text
-Rules:
-- satu user bisa mengakses banyak device
-- kombinasi (username, deviceId) unik
-```
 
----
-### Item
+### Item (`item`)
 - itemId (TEXT) [PK]
+- brandCode (TEXT)
 - article (TEXT)
 - material (TEXT)
 - color (TEXT)
 - size (TEXT)
 - name (TEXT)
+- disabled (BOOL)
 - description (TEXT)
 - category (TEXT)
 
-```text
-Rules:
-- itemId immutable
-```
----
-### Barcode
+
+### Barcode (`barcode`)
+- barcodeId (SERIAL) [PK]
 - itemId (TEXT) [FK -> Item.itemId]
-- barcode (TEXT)
-```text
-Rules:
-- barcode unik
-- barcode tidak boleh diubah
-- satu item bisa punya banyak barcode
-```
----
-### ProjectHeader
-- projectId (TEXT) [PK]
+- barcode (TEXT) 
+- brandCode (TEXT)
+- [Constraint]: Unique(barcode, brandCode)
+
+
+### ProjectHeader (`project`)
+- projectId (SERIAL) [PK]
+- projectCode (TEXT) [UNIQUE]
 - dateStart (DATE)
 - dateEnd (DATE)
 - description (TEXT)
@@ -75,16 +63,17 @@ Rules:
 - disabled (BOOL)
 - siteCode (TEXT)
 - brandCode (TEXT)
-```text
-Rules:
-- satu project aktif per site + brand
-- project disabled = true → semua transaksi ditolak
-- projectId immutable
-```
----
-### ProjectDetail
-- projectId (TEXT) [FK -> ProjectHeader.projectId]
+
+### ProjectUser (`project_user`)
+- projectId (SERIAL) [FK -> ProjectHeader.projectId]
+- username (TEXT) [FK -> User.username]
+- deviceId (INT) [FK -> Device.deviceId]
+- lastSync (TIMESTAMP)
+
+### ProjectDetail (`project_detil`)
+- projectId (SERIAL) [FK -> ProjectHeader.projectId]
 - itemId (TEXT) [FK -> Item.itemId]
+- barcode (TEXT)
 - price (DECIMAL)
 - sellPrice (DECIMAL)
 - discount (DECIMAL)
@@ -92,27 +81,15 @@ Rules:
 - stockQty (INT)
 - printQty (INT)
 - pricingId (TEXT)
-```text
-- kombinasi (projectId, itemId) unik
-- printQty hanya untuk label
-- stockQty digunakan untuk opname, receiving, transfer
-pricingId referensi pricing aktif
-```
 
----
-### ProjectResult
-- projectId (TEXT) [FK -> ProjectHeader.projectId]
+
+
+### ProjectResult (`project_result`)
+- projectId (SERIAL) [FK -> ProjectHeader.projectId]
 - itemId (TEXT) [FK -> Item.itemId]
-- deviceId (INT) [FK -> Device.deviceId]
-- timestamp (TIMESTAMP)
 - barcode (TEXT)
+- deviceId (INT) [FK -> Device.deviceId]
+- username (TEXT) [FK -> User.username]
+- timestamp (TIMESTAMP)
 - scannedQty (INT)
-```text
-Rules:
-- kombinasi (projectId, itemId, deviceId, barcode) unik
-- scannedQty tidak boleh diubah
-- barcode tidak boleh diubah
-- deviceId tidak boleh diubah
-- projectId tidak boleh diubah
-- itemId tidak boleh diubah
-```
+- [Constraint]: Unique(projectId, deviceId, timestamp) -> Untuk keperluan UPSERT
