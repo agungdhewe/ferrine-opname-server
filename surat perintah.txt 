@@ -7,3 +7,24 @@ Aturan:
 - Berikan ringkasan singkat (bullet points) tentang arsitektur, aturan DbContract, dan skema database yang kamu pahami dari dokumen tersebut.
 - Tunggu konfirmasi saya sebelum melakukan tindakan pengembangan fitur.
 - Jawab 'SIAP' jika kamu sudah paham.
+
+
+#2
+
+buatkan file DbContract, 
+file SQL untuk DDL, 
+serta SQL untuk insert dummy user:
+- usename: admin, password: 'rahasia123', isAdmin: true
+- username: user, passwprd: 'rahasia123', isAdmin: false 
+
+
+#3
+
+cek GEMINI.md, pada bagian Fitur 
+
+Aturan:
+- Jangan membuat file, direktori, atau kode apa pun sekarang.
+- Berikan ringkasan singkat (bullet points) tentang fitur-fitur yang akan kita buat dari dokumen tersebut.
+- Tunggu konfirmasi saya sebelum melakukan tindakan pengembangan fitur.
+- Jawab 'SIAP' jika kamu sudah paham.
+

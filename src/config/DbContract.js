@@ -2,6 +2,15 @@
  * DbContract - Single Source of Truth untuk nama tabel dan kolom database.
  * Sesuai dengan aturan DR1-DR5 di GEMINI.md.
  */
+
+const AUDIT_COLUMNS = {
+    createdBy: '"createdBy"',
+    createdAt: '"createdAt"',
+    updatedBy: '"updatedBy"',
+    updatedAt: '"updatedAt"',
+    isDeleted: '"isDeleted"'
+};
+
 const DbContract = {
     Device: {
         TABLE: '"device"',
@@ -9,7 +18,8 @@ const DbContract = {
             deviceId: '"deviceId"',
             name: '"name"',
             secret: '"secret"',
-            disabled: '"disabled"'
+            disabled: '"disabled"',
+            ...AUDIT_COLUMNS
         }
     },
     User: {
@@ -23,72 +33,88 @@ const DbContract = {
             allowReceiving: '"allowReceiving"',
             allowTransfer: '"allowTransfer"',
             allowPrintLabel: '"allowPrintLabel"',
-            disabled: '"disabled"'
-        }
-    },
-    UserDevice: {
-        TABLE: '"userdevice"',
-        Columns: {
-            username: '"username"',
-            deviceId: '"deviceId"'
+            disabled: '"disabled"',
+            ...AUDIT_COLUMNS
         }
     },
     Item: {
         TABLE: '"item"',
         Columns: {
             itemId: '"itemId"',
+            brandCode: '"brandCode"',
             article: '"article"',
             material: '"material"',
             color: '"color"',
             size: '"size"',
             name: '"name"',
+            disabled: '"disabled"',
             description: '"description"',
-            category: '"category"'
+            category: '"category"',
+            ...AUDIT_COLUMNS
         }
     },
     Barcode: {
         TABLE: '"barcode"',
         Columns: {
+            barcodeId: '"barcodeId"',
+            itemId: '"itemId"',
             barcode: '"barcode"',
-            itemId: '"itemId"'
+            brandCode: '"brandCode"',
+            ...AUDIT_COLUMNS
         }
     },
     ProjectHeader: {
         TABLE: '"project"',
         Columns: {
             projectId: '"projectId"',
+            projectCode: '"projectCode"',
             dateStart: '"dateStart"',
             dateEnd: '"dateEnd"',
             description: '"description"',
             workingType: '"workingType"',
             disabled: '"disabled"',
             siteCode: '"siteCode"',
-            brandCode: '"brandCode"'
+            brandCode: '"brandCode"',
+            ...AUDIT_COLUMNS
+        }
+    },
+    ProjectUser: {
+        TABLE: '"project_user"',
+        Columns: {
+            projectId: '"projectId"',
+            username: '"username"',
+            deviceId: '"deviceId"',
+            lastSync: '"lastSync"',
+            ...AUDIT_COLUMNS
         }
     },
     ProjectDetail: {
-        TABLE: '"projectdetil"',
+        TABLE: '"project_detil"',
         Columns: {
             projectId: '"projectId"',
             itemId: '"itemId"',
+            barcode: '"barcode"',
             price: '"price"',
             sellPrice: '"sellPrice"',
             discount: '"discount"',
             isSpecialPrice: '"isSpecialPrice"',
             stockQty: '"stockQty"',
             printQty: '"printQty"',
-            pricingId: '"pricingId"'
+            pricingId: '"pricingId"',
+            ...AUDIT_COLUMNS
         }
     },
     ProjectResult: {
-        TABLE: '"projectresult"',
+        TABLE: '"project_result"',
         Columns: {
             projectId: '"projectId"',
             itemId: '"itemId"',
-            deviceId: '"deviceId"',
-            timestamp: '"timestamp"',
             barcode: '"barcode"',
-            scannedQty: '"scannedQty"'
+            deviceId: '"deviceId"',
+            username: '"username"',
+            timestamp: '"timestamp"',
+            scannedQty: '"scannedQty"',
+            ...AUDIT_COLUMNS
         }
     }
 };
