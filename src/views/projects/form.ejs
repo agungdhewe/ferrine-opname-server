@@ -47,7 +47,7 @@
                                 targetProject.isCompleted ? 'disabled' : '' %>>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label for="siteCode"
                                 class="form-label fw-bold font-monospace small text-uppercase text-secondary">Site
                                 Code</label>
@@ -56,30 +56,12 @@
                                 <%=targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
                         </div>
 
-                        <div class="col-md-3">
+                        <div class="col-md-4">
                             <label for="brandCode"
                                 class="form-label fw-bold font-monospace small text-uppercase text-secondary">Brand
                                 Code</label>
                             <input type="text" class="form-control" id="brandCode" name="brandCode" required
-                                placeholder="FERRINE" value="<%= targetProject ? targetProject.brandCode : '' %>"
-                                <%=targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label for="dateStart"
-                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Tanggal
-                                Mulai</label>
-                            <input type="date" class="form-control" id="dateStart" name="dateStart" required
-                                value="<%= targetProject && targetProject.dateStart ? new Date(targetProject.dateStart).toISOString().split('T')[0] : '' %>"
-                                <%=targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
-                        </div>
-
-                        <div class="col-md-4">
-                            <label for="dateEnd"
-                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Tanggal
-                                Selesai</label>
-                            <input type="date" class="form-control" id="dateEnd" name="dateEnd" required
-                                value="<%= targetProject && targetProject.dateEnd ? new Date(targetProject.dateEnd).toISOString().split('T')[0] : '' %>"
+                                placeholder="BRAND CODE" value="<%= targetProject ? targetProject.brandCode : '' %>"
                                 <%=targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
                         </div>
 
@@ -96,6 +78,24 @@
                                 <option value="TRANSFER" <%=targetProject && targetProject.workingType==='TRANSFER'
                                     ? 'selected' : '' %>>TRANSFER</option>
                             </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="dateStart"
+                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Tanggal
+                                Mulai</label>
+                            <input type="date" class="form-control" id="dateStart" name="dateStart" required
+                                value="<%= targetProject && targetProject.dateStart ? new Date(targetProject.dateStart).toISOString().split('T')[0] : '' %>"
+                                <%=targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="dateEnd"
+                                class="form-label fw-bold font-monospace small text-uppercase text-secondary">Tanggal
+                                Selesai</label>
+                            <input type="date" class="form-control" id="dateEnd" name="dateEnd" required
+                                value="<%= targetProject && targetProject.dateEnd ? new Date(targetProject.dateEnd).toISOString().split('T')[0] : '' %>"
+                                <%=targetProject && targetProject.isCompleted ? 'disabled' : '' %>>
                         </div>
 
                         <div class="col-12">
